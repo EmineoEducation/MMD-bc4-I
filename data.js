@@ -609,6 +609,7 @@ window.PAC_CONFIG = {
   "commanditaire": "Sonia Ferracci",
   "entreprise": "Lumio Health",
   "dispositif": "PAC",
+  "accroche": "Tu es mandaté·e par <strong>Sonia Ferracci, Directrice Marketing de Lumio Health</strong>, pour concevoir la stratégie de marketing digital et e-commerce de l'<em>Opération Cortisol Zero</em> — le lancement du bracelet Lumio Serenity Pro. Positionnement en ligne, sélection des canaux, contenus accessibles, KPI, optimisation du parcours d'achat et rentabilité e-commerce&nbsp;: tout reste à construire. Jakob Rein (Northgate Capital) surveille de près les métriques d'acquisition. Sonia attend une proposition structurée, pas une liste de bonnes pratiques. <em>Le produit est prêt. Le marché ne t'attend pas.</em>",
   "note_reflexive": false,
   "temps": [
     {
