@@ -303,7 +303,7 @@ function WelcomeBriefCard({ onClose, studentName }) {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>3h30</span>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>=</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>3 semaines dans la vraie vie</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>18 jours dans l'univers Lumio</span>
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {actes.map(a => (
@@ -432,6 +432,11 @@ function Root() {
       }
       // Substituer le nom/email partout dans les données
       applyStudent(n, session.studentEmail);
+      // Si la session vient du portail (fromPortal) : brief ou desktop, jamais lockscreen
+      if (session.fromPortal) {
+        setPhase(session.timerStart ? 'desktop' : 'brief');
+        return;
+      }
       // Reprendre directement sur le bureau
       setPhase('desktop');
     });
