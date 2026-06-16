@@ -520,9 +520,68 @@ window.LUMIO_DATA = {
     "footer": "<em>1 jour fictif ≈ 11 minutes réelles · ratio ×74</em>"
   },
   "trash": {
-    "title": "La corbeille est vide.",
-    "body": "Mais l'idée est bonne. La plupart des consultants commencent par jeter quelque chose."
-  },
+  "items": [
+    {
+      "name": "planning_v0.mpp",
+      "icon": "📊",
+      "size": "980 Ko",
+      "date": "sept.",
+      "isEgg": false
+    },
+    {
+      "name": "notes_perso.txt",
+      "icon": "📄",
+      "size": "4 Ko",
+      "date": "sept.",
+      "isEgg": false
+    },
+    {
+      "name": "Capture WhatsApp — Jakob.png",
+      "icon": "🖼",
+      "size": "176 Ko",
+      "date": "veille brief",
+      "isEgg": true
+    }
+  ],
+  "egg": {
+    "contact": "Jakob Rein",
+    "status": "vu hier",
+    "meKey": "theo",
+    "badge": "Conversation non destinée au dossier",
+    "messages": [
+      {
+        "from": "theo",
+        "text": "Jakob, avant demain — sur le deck investisseur, j'ai pas fait figurer le taux de conversion bêta",
+        "time": "22:03"
+      },
+      {
+        "from": "theo",
+        "text": "0,9%. C'est pas un chiffre qu'on montre à ce stade. La strat digitale qu'on prépare doit raconter une histoire convaincante avant qu'on corrige le tir en interne",
+        "time": "22:04"
+      },
+      {
+        "from": "jakob",
+        "text": "Théo. Je veux voir les vrais GA4 avant de signer.",
+        "time": "22:09"
+      },
+      {
+        "from": "jakob",
+        "text": "Si la stratégie est solide, les chiffres bêta ne me font pas peur. Ce qui me ferait peur c'est de les découvrir après.",
+        "time": "22:10"
+      },
+      {
+        "from": "theo",
+        "text": "…ok. Tu les auras.",
+        "time": "22:14"
+      },
+      {
+        "from": "jakob",
+        "text": "Bien. Une bonne strat assume ses chiffres et propose un plan d'optimisation crédible. Pas l'inverse.",
+        "time": "22:15"
+      }
+    ]
+  }
+},
   "slack": {
     "workspace": "Lumio Health",
     "channels": [
