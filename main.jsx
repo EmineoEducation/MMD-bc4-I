@@ -295,7 +295,27 @@ function WelcomeBriefCard({ onClose, studentName }) {
           Bienvenue, {prenom}.
         </h1>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', marginBottom: 10 }}>
-          Tu es <strong>{studentName}</strong>, consultant·e stratégie marcom. Théo Marczak, CEO de Lumio Health, t'a confié une mission urgente : produire la <strong>recommandation stratégique</strong> que l'entreprise défendra vendredi devant son board d'investisseurs. Tu as accès à un poste de mission : email de Théo, email confidentiel de Jakob, deck board Q3, veille concurrentielle, verbatims terrain. <em>Jakob Rein attend une décision, pas une analyse.</em>
+          {(() => {
+            const cfg  = window.PAC_CONFIG || {};
+            const data = window.LUMIO_DATA || {};
+            const mission = data.mission || {};
+            const role = ((data.student && data.student.role) || 'consultant·e externe').toLowerCase();
+            const commanditaire = cfg.commanditaire || 'le commanditaire';
+            const commanditaireRole = mission.commanditaire_role || '';
+            const titreAffaire = mission.titre_affaire || (cfg.titre || 'la mission');
+            const situation = mission.situation || '';
+            const enjeu = mission.enjeu_central || '';
+            const docsLabel = mission.documents_label || 'le poste de mission';
+            return (
+              <>
+                Tu es <strong>{studentName}</strong>, {role}. <strong>{commanditaire}</strong>
+                {commanditaireRole ? ' (' + commanditaireRole + ')' : ''} t'a confié une mission urgente :{' '}
+                <strong>{titreAffaire}</strong>. {situation ? situation + ' ' : ''}
+                Tu as accès à un poste de mission contenant {docsLabel}.{' '}
+                {enjeu ? <em>{enjeu}</em> : null}
+              </>
+            );
+          })()}
         </p>
 
         {/* Bloc temporel — central */}
@@ -303,7 +323,7 @@ function WelcomeBriefCard({ onClose, studentName }) {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>3h30</span>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>=</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>18 jours dans l'univers Lumio</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{(window.LUMIO_DATA && window.LUMIO_DATA.mission && window.LUMIO_DATA.mission.ratio_label) || '18 jours dans la vraie vie'}</span>
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {actes.map(a => (
@@ -328,11 +348,15 @@ function WelcomeBriefCard({ onClose, studentName }) {
         <div style={{ background: '#f7f4ef', borderRadius: 8, padding: '14px 18px', marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Trois règles, pas de négociation</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { ico: '📄', txt: 'Tout ce que tu sais, c\'est dans les documents.' },
-              { ico: '🤐', txt: 'Jakob ne te dira pas "si c\'est juste". Il teste chaque hypothèse. Il ne cherche pas à t\'aider — il protège son investissement.' },
-              { ico: '💬', txt: 'Quand tu as une hypothèse solide → Slack → Jakob. Sa réaction débloque la suite.' },
-            ].map((r, i) => (
+            {(() => {
+              const cmd = (window.PAC_CONFIG && window.PAC_CONFIG.commanditaire) || 'le commanditaire';
+              const cmdPrenom = cmd.split(/\s+/)[0] || cmd;
+              return [
+                { ico: '📄', txt: 'Tout ce que tu sais, c\'est dans les documents.' },
+                { ico: '🤐', txt: cmd + ' ne te dira pas « si c\'est juste ». ' + cmdPrenom + ' teste tes hypothèses sans te donner la réponse — et sans te juger publiquement.' },
+                { ico: '💬', txt: 'Quand tu as une hypothèse solide → Slack → ' + cmdPrenom + '. Sa réaction débloque la suite.' },
+              ];
+            })().map((r, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>{r.ico}</span>
                 <span style={{ fontSize: 13, color: '#2a2620', lineHeight: 1.55 }}>{r.txt}</span>
@@ -432,11 +456,6 @@ function Root() {
       }
       // Substituer le nom/email partout dans les données
       applyStudent(n, session.studentEmail);
-      // Si la session vient du portail (fromPortal) : brief ou desktop, jamais lockscreen
-      if (session.fromPortal) {
-        setPhase(session.timerStart ? 'desktop' : 'brief');
-        return;
-      }
       // Reprendre directement sur le bureau
       setPhase('desktop');
     });

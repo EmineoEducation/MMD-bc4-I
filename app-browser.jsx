@@ -94,9 +94,7 @@ function ArticleView({ article, related }) {
       </div>
       <h1 style={browserStyles.headline}>{article.headline}</h1>
       {article.lede && <p style={browserStyles.lede}>{article.lede}</p>}
-      <div style={browserStyles.placeholder}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#9a9ea8', letterSpacing: '0.1em' }}>{article.illustration || 'PHOTO ILLUSTRATIVE'}</span>
-      </div>
+      <div style={browserStyles.placeholder} aria-hidden="true" />
       <div style={browserStyles.body}>
         {(article.body || '').split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
       </div>
