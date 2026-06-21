@@ -99,7 +99,7 @@ function NameScreen({ onConfirm }) {
     }}>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 8 }}>{(window.PAC_CONFIG ? window.PAC_CONFIG.dispositif + ' · ' + window.PAC_CONFIG.bloc : 'PAC')}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 200, letterSpacing: '-0.02em', marginBottom: 8, textShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>Lumio Health</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, opacity: 0.7, marginBottom: 40 }}>Une recommandation à défendre</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, opacity: 0.7, marginBottom: 40 }}>{(window.PAC_CONFIG && window.PAC_CONFIG.accroche_namescreen && window.PAC_CONFIG.accroche_namescreen.subtitle) || 'Un dossier à traiter'}</div>
 
       <div style={{
         background: 'rgba(255,255,255,0.12)',
@@ -260,6 +260,8 @@ function LoginScreen({ onLogin, studentName }) {
 function WelcomeBriefCard({ onClose, studentName }) {
   const prenom = studentName.split(' ')[0];
   const [accepted, setAccepted] = useRootState(false);
+  const __acc = (window.PAC_CONFIG && window.PAC_CONFIG.accroche_namescreen) || null;
+
 
   const handleStart = () => {
     if (!accepted) return;
@@ -294,28 +296,14 @@ function WelcomeBriefCard({ onClose, studentName }) {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.15, marginBottom: 14 }}>
           Bienvenue, {prenom}.
         </h1>
-        <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', marginBottom: 10 }}>
-          {(() => {
-            const cfg  = window.PAC_CONFIG || {};
-            const data = window.LUMIO_DATA || {};
-            const mission = data.mission || {};
-            const role = ((data.student && data.student.role) || 'consultant·e externe').toLowerCase();
-            const commanditaire = cfg.commanditaire || 'le commanditaire';
-            const commanditaireRole = mission.commanditaire_role || '';
-            const titreAffaire = mission.titre_affaire || (cfg.titre || 'la mission');
-            const situation = mission.situation || '';
-            const enjeu = mission.enjeu_central || '';
-            const docsLabel = mission.documents_label || 'le poste de mission';
-            return (
-              <>
-                Tu es <strong>{studentName}</strong>, {role}. <strong>{commanditaire}</strong>
-                {commanditaireRole ? ' (' + commanditaireRole + ')' : ''} t'a confié une mission urgente :{' '}
-                <strong>{titreAffaire}</strong>. {situation ? situation + ' ' : ''}
-                Tu as accès à un poste de mission contenant {docsLabel}.{' '}
-                {enjeu ? <em>{enjeu}</em> : null}
-              </>
-            );
-          })()}
+                <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', marginBottom: 10 }}>
+          {__acc && __acc.intro
+            ? __acc.intro.split('{{STUDENT}}').reduce((out, part, i) => {
+                if (i > 0) out.push(<strong key={'s'+i}>{studentName}</strong>);
+                out.push(<React.Fragment key={'t'+i}>{part}</React.Fragment>);
+                return out;
+              }, [])
+            : <span>Tu es <strong>{studentName}</strong>, consultant·e externe. Tu disposes d'un poste de mission dédié pour produire le livrable attendu par le jury.</span>}
         </p>
 
         {/* Bloc temporel — central */}
@@ -323,7 +311,7 @@ function WelcomeBriefCard({ onClose, studentName }) {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>3h30</span>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>=</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{(window.LUMIO_DATA && window.LUMIO_DATA.mission && window.LUMIO_DATA.mission.ratio_label) || '18 jours dans la vraie vie'}</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{__acc && __acc.ratio_label ? __acc.ratio_label : '3 semaines dans la vraie vie'}</span>
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {actes.map(a => (
@@ -348,15 +336,11 @@ function WelcomeBriefCard({ onClose, studentName }) {
         <div style={{ background: '#f7f4ef', borderRadius: 8, padding: '14px 18px', marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Trois règles, pas de négociation</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {(() => {
-              const cmd = (window.PAC_CONFIG && window.PAC_CONFIG.commanditaire) || 'le commanditaire';
-              const cmdPrenom = cmd.split(/\s+/)[0] || cmd;
-              return [
-                { ico: '📄', txt: 'Tout ce que tu sais, c\'est dans les documents.' },
-                { ico: '🤐', txt: cmd + ' ne te dira pas « si c\'est juste ». ' + cmdPrenom + ' teste tes hypothèses sans te donner la réponse — et sans te juger publiquement.' },
-                { ico: '💬', txt: 'Quand tu as une hypothèse solide → Slack → ' + cmdPrenom + '. Sa réaction débloque la suite.' },
-              ];
-            })().map((r, i) => (
+            {(__acc && __acc.regles && __acc.regles.length ? __acc.regles : [
+              { ico: '📄', txt: 'Tout ce que tu sais, c\'est dans les documents du poste de mission.' },
+              { ico: '🤐', txt: 'Le jury teste chaque hypothèse. Il ne cherche pas à t\'aider — il évalue.' },
+              { ico: '💬', txt: 'Quand tu as une hypothèse solide → Slack → ton commanditaire. Sa réaction débloque la suite.' },
+            ]).map((r, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>{r.ico}</span>
                 <span style={{ fontSize: 13, color: '#2a2620', lineHeight: 1.55 }}>{r.txt}</span>
@@ -456,6 +440,11 @@ function Root() {
       }
       // Substituer le nom/email partout dans les données
       applyStudent(n, session.studentEmail);
+      // Si la session vient du portail (fromPortal) : brief ou desktop, jamais lockscreen
+      if (session.fromPortal) {
+        setPhase(session.timerStart ? 'desktop' : 'brief');
+        return;
+      }
       // Reprendre directement sur le bureau
       setPhase('desktop');
     });

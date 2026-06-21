@@ -662,6 +662,26 @@ window.LUMIO_DATA = {
 
 window.PAC_CONFIG = {
   "bloc": "bc4-i",
+  accroche_namescreen: {
+    "subtitle": "Stratégie marketing digital & e-commerce",
+    "role": "consultant·e marketing digital",
+    "intro": "Tu es {{STUDENT}}, consultant·e marketing digital chez Lumio Health pour l'Opération Cortisol Zero — le lancement digital du bracelet Lumio Serenity Pro. Stratégie d'acquisition, contenus accessibles, mesure d'efficacité, rentabilité e-commerce : tu produis la stratégie de marketing digital et e-commerce (E4-I).",
+    "ratio_label": "3 semaines dans la vraie vie",
+    "regles": [
+      {
+        "ico": "📄",
+        "txt": "Tout ce que tu sais, c'est dans les documents marketing du poste de mission."
+      },
+      {
+        "ico": "🤐",
+        "txt": "Le jury évalue l'intégration de ta stratégie au plan global, l'accessibilité des contenus et la rentabilité e-commerce."
+      },
+      {
+        "ico": "💬",
+        "txt": "Quand tu as une hypothèse solide → Slack → ta commanditaire. Sa réaction débloque la suite."
+      }
+    ]
+  },
   "titre": "Développer une stratégie de marketing digital et e-commerce au service d'un commanditaire",
   "epreuve": "E4-I. Proposition d'une stratégie de marketing digital et e-commerce",
   "deadline": "14 mars 2025 · 18h00",
