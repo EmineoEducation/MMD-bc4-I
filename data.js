@@ -1,6 +1,6 @@
 // ══════════════════════════════════════════════════════════════
 //  DATA · PAC BC4-I · Manager en stratégie et développement de projet digital
-//  Opération Cortisol Zero — Lancement digital du bracelet Lumio Serenity Pro · 14 mars 2025
+//  Opération Cortisol Zero — Lancement digital du bracelet Lumio Lumio Arc · 14 mars 2025
 //  Schéma : mailbox[] · dossiers[] · notes[] · guide · finder · calendar · slack
 //  ⚠️  Remplacer les [À COMPLÉTER] par le contenu narratif réel du bloc.
 //  ⚠️  Les placeholders {{PRENOM}} {{NOM}} {{EMAIL_ETUDIANT}} sont substitués à la connexion.
@@ -19,10 +19,10 @@ window.LUMIO_DATA = {
       "id": "DOC-01",
       "from": "Théo Marczak (CEO, Lumio Health)",
       "fromEmail": "theo.marczak@lumio-health.com",
-      "subject": "URGENT — Brief stratégie digitale Serenity Pro pour Northgate",
+      "subject": "URGENT — Brief stratégie digitale Lumio Arc pour Northgate",
       "date": "14 mars 2025",
-      "preview": "Jakob Rein attend le dossier complet le 24 mars — 2,3 M€ en jeu, stratégie digitale Serenity Pro à boucler en 10 jours.",
-      "body": "Sonia,\n\nJakob Rein a confirmé ce matin : la décision sur les 2,3 M€ tombe dans 10 jours. Pas 12, pas 11. On présente le 24 mars, dossier complet, chiffres vérifiables.\n\nIl veut une stratégie digitale intégrée pour le lancement du Serenity Pro — France + Europe du Nord — avec des projections de ROI claires, une architecture e-commerce documentée et une conformité data irréprochable. Son mot exact : « irréprochable ». Le RGPD, l'accessibilité, tout ça doit être traité, pas survolé. Yassine a remonté des alertes RGAA sur nos contenus actuels — il faut que ce soit réglé avant qu'on montre quoi que ce soit à Northgate.\n\nSur le fond : je veux une stratégie B2C ambitieuse, acquisition large, visibilité européenne. Camille va insister pour qu'on réserve une part significative du budget aux DRH grands comptes — elle n'a pas tort sur le potentiel, mais Northgate finance une histoire de croissance scalable, pas un prolongement de notre base B2B existante. Trouve l'équilibre, mais qu'on soit clairs sur la priorité.\n\nTu pilotes la task force. Tu as carte blanche sur l'organisation, mais je veux un point intermédiaire jeudi 20 mars à 9h pour valider les arbitrages budgétaires avant mise en forme finale.\n\nMobilise ce qu'il faut. On n'a pas le droit de rater ça.\n\nThéo\nThéo Marczak — CEO, Lumio Health\n+33 6 12 34 56 78 | theo.marczak@lumiohealth.fr",
+      "preview": "Jakob Rein attend le dossier complet le 24 mars — 2,3 M€ en jeu, stratégie digitale Lumio Arc à boucler en 10 jours.",
+      "body": "Sonia,\n\nJakob Rein a confirmé ce matin : la décision sur les 2,3 M€ tombe dans 10 jours. Pas 12, pas 11. On présente le 24 mars, dossier complet, chiffres vérifiables.\n\nIl veut une stratégie digitale intégrée pour le lancement du Lumio Arc — France + Europe du Nord — avec des projections de ROI claires, une architecture e-commerce documentée et une conformité data irréprochable. Son mot exact : « irréprochable ». Le RGPD, l'accessibilité, tout ça doit être traité, pas survolé. Yassine a remonté des alertes RGAA sur nos contenus actuels — il faut que ce soit réglé avant qu'on montre quoi que ce soit à Northgate.\n\nSur le fond : je veux une stratégie B2C ambitieuse, acquisition large, visibilité européenne. Camille va insister pour qu'on réserve une part significative du budget aux DRH grands comptes — elle n'a pas tort sur le potentiel, mais Northgate finance une histoire de croissance scalable, pas un prolongement de notre base B2B existante. Trouve l'équilibre, mais qu'on soit clairs sur la priorité.\n\nTu pilotes la task force. Tu as carte blanche sur l'organisation, mais je veux un point intermédiaire jeudi 20 mars à 9h pour valider les arbitrages budgétaires avant mise en forme finale.\n\nMobilise ce qu'il faut. On n'a pas le droit de rater ça.\n\nThéo\nThéo Marczak — CEO, Lumio Health\n+33 6 12 34 56 78 | theo.marczak@lumiohealth.fr",
       "avatar": "TM",
       "avatarColor": "#134547",
       "unread": true,
@@ -35,10 +35,10 @@ window.LUMIO_DATA = {
       "id": "DOC-06",
       "from": "Jakob Rein (Partenaire Northgate Capital)",
       "fromEmail": "jakob.rein@lumio-health.com",
-      "subject": "Due diligence marketing Serenity Pro — 6 points bloquants avant décision Northgate",
+      "subject": "Due diligence marketing Lumio Arc — 6 points bloquants avant décision Northgate",
       "date": "14 mars 2025",
       "preview": "Jakob Rein pose 6 questions bloquantes sur RGPD, CAC/LTV, positionnement et plan de contingence avant de valider les 2,3 M€.",
-      "body": "Sonia,\n\nAvant toute validation de notre engagement sur les 2,3 M€, j'ai besoin de réponses écrites et documentées sur six points. Je les attends d'ici le 21 mars, format synthèse + pièces justificatives.\n\n1. Conformité RGPD / tracking : Quel est le statut exact de votre CMP ? Avez-vous un DPO désigné ? Sur quels fondements juridiques reposent la collecte des données biométriques via le Serenity Pro et le retargeting publicitaire prévu ?\n\n2. Modèle CAC / LTV à 18 mois : Je veux voir vos hypothèses chiffrées canal par canal — paid social, SEO, B2B direct — avec une LTV calculée sur 18 mois et un ratio LTV/CAC cible explicitement justifié. Les benchmarks sectoriels que vous utilisez doivent être sourcés.\n\n3. Différenciation vs Garmin et Fitbit : Sur quels attributs précis positionnez-vous le Serenity Pro ? \"Mesure du stress\" n'est pas une réponse suffisante — Garmin et Fitbit couvrent déjà ce territoire dans leur communication. Je veux une matrice de positionnement.\n\n4. Stratégie de rétention post-achat : Quels mécanismes concrets — onboarding, programme de fidélité, upsell abonnement, NPS actionnable — activez-vous après la première transaction ? Le taux de churn estimé à 12 mois doit figurer dans votre réponse.\n\n5. Reporting temps réel : Quel outil, quel tableau de bord, quels KPIs suivis à quelle fréquence ? Northgate s'attend à un accès en lecture sur un dashboard opérationnel, pas à des reportings PDF mensuels.\n\n6. Plan de contingence si ROAS < 1,5x à J+90 : Si les campagnes paid n'atteignent pas ce seuil 90 jours après le lancement, quelles actions correctrices sont déjà arbitrées — réallocation budgétaire, changement de ciblage, suspension de certains canaux ? J'ai besoin d'un scénario dégradé formalisé, pas d'une promesse de réactivité.\n\nJe note par ailleurs que plusieurs de ces éléments auraient dû figurer dans le dossier initial transmis la semaine dernière. Ce n'était pas le cas. La décision du comité est conditionnée à la qualité de vos réponses sur ces six points — pas à votre calendrier interne.\n\nDisponible pour un call de 30 minutes le 24 mars si nécessaire.\n\nJakob Rein\nPartner — Northgate Capital\njakob.rein@northgate-capital.eu\n+33 1 44 XX XX XX",
+      "body": "Sonia,\n\nAvant toute validation de notre engagement sur les 2,3 M€, j'ai besoin de réponses écrites et documentées sur six points. Je les attends d'ici le 21 mars, format synthèse + pièces justificatives.\n\n1. Conformité RGPD / tracking : Quel est le statut exact de votre CMP ? Avez-vous un DPO désigné ? Sur quels fondements juridiques reposent la collecte des données biométriques via le Lumio Arc et le retargeting publicitaire prévu ?\n\n2. Modèle CAC / LTV à 18 mois : Je veux voir vos hypothèses chiffrées canal par canal — paid social, SEO, B2B direct — avec une LTV calculée sur 18 mois et un ratio LTV/CAC cible explicitement justifié. Les benchmarks sectoriels que vous utilisez doivent être sourcés.\n\n3. Différenciation vs Garmin et Fitbit : Sur quels attributs précis positionnez-vous le Lumio Arc ? \"Mesure du stress\" n'est pas une réponse suffisante — Garmin et Fitbit couvrent déjà ce territoire dans leur communication. Je veux une matrice de positionnement.\n\n4. Stratégie de rétention post-achat : Quels mécanismes concrets — onboarding, programme de fidélité, upsell abonnement, NPS actionnable — activez-vous après la première transaction ? Le taux de churn estimé à 12 mois doit figurer dans votre réponse.\n\n5. Reporting temps réel : Quel outil, quel tableau de bord, quels KPIs suivis à quelle fréquence ? Northgate s'attend à un accès en lecture sur un dashboard opérationnel, pas à des reportings PDF mensuels.\n\n6. Plan de contingence si ROAS < 1,5x à J+90 : Si les campagnes paid n'atteignent pas ce seuil 90 jours après le lancement, quelles actions correctrices sont déjà arbitrées — réallocation budgétaire, changement de ciblage, suspension de certains canaux ? J'ai besoin d'un scénario dégradé formalisé, pas d'une promesse de réactivité.\n\nJe note par ailleurs que plusieurs de ces éléments auraient dû figurer dans le dossier initial transmis la semaine dernière. Ce n'était pas le cas. La décision du comité est conditionnée à la qualité de vos réponses sur ces six points — pas à votre calendrier interne.\n\nDisponible pour un call de 30 minutes le 24 mars si nécessaire.\n\nJakob Rein\nPartner — Northgate Capital\njakob.rein@northgate-capital.eu\n+33 1 44 XX XX XX",
       "avatar": "JR",
       "avatarColor": "#7a756c",
       "unread": false,
@@ -61,7 +61,7 @@ window.LUMIO_DATA = {
           "blocks": [
             {
               "type": "p",
-              "text": "Dans le cadre de la préparation du lancement Serenity Pro et à la demande de Sonia Ferracci, j'ai conduit un audit express du site lumiohealth.fr et des contenus digitaux associés (landing pages, ressources blog, vidéos produit) sur la période du 10 au 13 mars 2025. L'audit s'appuie sur le référentiel RGAA 4.1, obligatoire pour les organismes publics et fortement recommandé pour tout acteur souhaitant distribuer en Europe du Nord (Suède, Norvège, Danemark — marchés cibles du lancement). Résultat : 8 non-conformités critiques sont identifiées. Elles doivent être corrigées avant toute activation de campagne."
+              "text": "Dans le cadre de la préparation du lancement Lumio Arc et à la demande de Sonia Ferracci, j'ai conduit un audit express du site lumiohealth.fr et des contenus digitaux associés (landing pages, ressources blog, vidéos produit) sur la période du 10 au 13 mars 2025. L'audit s'appuie sur le référentiel RGAA 4.1, obligatoire pour les organismes publics et fortement recommandé pour tout acteur souhaitant distribuer en Europe du Nord (Suède, Norvège, Danemark — marchés cibles du lancement). Résultat : 8 non-conformités critiques sont identifiées. Elles doivent être corrigées avant toute activation de campagne."
             },
             {
               "type": "h2",
@@ -69,7 +69,7 @@ window.LUMIO_DATA = {
             },
             {
               "type": "p",
-              "text": "1. CONTRASTES INSUFFISANTS (Critère 3.2) — Le ratio de contraste entre le texte gris clair (#9E9E9E) et le fond blanc sur la homepage est de 2,8:1, bien en dessous du seuil RGAA de 4,5:1 pour le texte courant. Concerne notamment les légendes de visuels produit et les CTA secondaires. / 2. ABSENCE D'ATTRIBUTS ALT SUR LES IMAGES FONCTIONNELLES (Critère 1.1) — 34 images sur 47 analysées sont dépourvues d'attribut alt renseigné. Parmi elles, les visuels du bracelet Serenity Pro sur la page pré-lancement. / 3. VIDÉOS SANS SOUS-TITRES (Critère 4.1) — Les 3 vidéos de démonstration produit hébergées en natif (format .mp4, durée totale : 8 min 22 s) ne comportent aucun sous-titre synchronisé ni transcription textuelle alternative. / 4. FORMULAIRES SANS ÉTIQUETTES EXPLICITES (Critère 11.1) — Le formulaire de demande de démo B2B (page /demo-entreprise) utilise des placeholders comme seule indication de champ, sans balise <label> associée. / 5. NAVIGATION AU CLAVIER INCOMPLÈTE (Critère 12.1) — Le menu principal et les modales de téléchargement de ressources RH ne sont pas accessibles via la touche Tab. Focus visible absent sur plusieurs éléments interactifs. / 6. LIENS NON EXPLICITES (Critère 6.1) — 12 occurrences du lien générique 'Cliquez ici' ou 'En savoir plus' sans contexte adjacent suffisant, notamment dans les articles du blog bien-être au travail. / 7. DOCUMENTS PDF NON BALISÉS (Critère 13.3) — Les 4 livres blancs téléchargeables (dont 'Stress & Performance, édition 2024') sont des PDF image non structurés, illisibles par les lecteurs d'écran. / 8. LANGUE DE LA PAGE NON DÉCLARÉE (Critère 8.3) — L'attribut lang est absent sur l'ensemble des pages du site. Impacte la restitution vocale et le référencement multilingue pour les marchés nordiques."
+              "text": "1. CONTRASTES INSUFFISANTS (Critère 3.2) — Le ratio de contraste entre le texte gris clair (#9E9E9E) et le fond blanc sur la homepage est de 2,8:1, bien en dessous du seuil RGAA de 4,5:1 pour le texte courant. Concerne notamment les légendes de visuels produit et les CTA secondaires. / 2. ABSENCE D'ATTRIBUTS ALT SUR LES IMAGES FONCTIONNELLES (Critère 1.1) — 34 images sur 47 analysées sont dépourvues d'attribut alt renseigné. Parmi elles, les visuels du bracelet Lumio Arc sur la page pré-lancement. / 3. VIDÉOS SANS SOUS-TITRES (Critère 4.1) — Les 3 vidéos de démonstration produit hébergées en natif (format .mp4, durée totale : 8 min 22 s) ne comportent aucun sous-titre synchronisé ni transcription textuelle alternative. / 4. FORMULAIRES SANS ÉTIQUETTES EXPLICITES (Critère 11.1) — Le formulaire de demande de démo B2B (page /demo-entreprise) utilise des placeholders comme seule indication de champ, sans balise <label> associée. / 5. NAVIGATION AU CLAVIER INCOMPLÈTE (Critère 12.1) — Le menu principal et les modales de téléchargement de ressources RH ne sont pas accessibles via la touche Tab. Focus visible absent sur plusieurs éléments interactifs. / 6. LIENS NON EXPLICITES (Critère 6.1) — 12 occurrences du lien générique 'Cliquez ici' ou 'En savoir plus' sans contexte adjacent suffisant, notamment dans les articles du blog bien-être au travail. / 7. DOCUMENTS PDF NON BALISÉS (Critère 13.3) — Les 4 livres blancs téléchargeables (dont 'Stress & Performance, édition 2024') sont des PDF image non structurés, illisibles par les lecteurs d'écran. / 8. LANGUE DE LA PAGE NON DÉCLARÉE (Critère 8.3) — L'attribut lang est absent sur l'ensemble des pages du site. Impacte la restitution vocale et le référencement multilingue pour les marchés nordiques."
             },
             {
               "type": "callout",
@@ -81,7 +81,7 @@ window.LUMIO_DATA = {
             },
             {
               "type": "p",
-              "text": "Je propose une remédiation en deux phases à intégrer impérativement dans la stratégie de contenu pilotée par Sonia. Phase 1 — Corrections bloquantes (J+5, avant toute mise en ligne des pages Serenity Pro) : correction des contrastes, ajout des alt-texts sur toutes les images produit, pose des balises lang, remplacement des liens génériques. Charge estimée : 3 jours développeur front + 1 jour éditorial. Phase 2 — Conformité complète (J+21, avant activation des campagnes paid) : sous-titrage des vidéos (prestataire recommandé : Captivoice, devis 320 € HT pour les 3 vidéos), restructuration des PDF en documents balisés, refonte des formulaires avec labels explicites, audit navigation clavier complet. Charge estimée : 5 jours développeur + 2 jours content. Je reste disponible pour coordonner ce chantier, sous réserve d'un cadrage clair des priorités avec Sonia d'ici le 17 mars. Je signale en parallèle que la charge actuelle de production de contenus pour le lancement ne me permet pas d'absorber ce périmètre seul dans les délais demandés."
+              "text": "Je propose une remédiation en deux phases à intégrer impérativement dans la stratégie de contenu pilotée par Sonia. Phase 1 — Corrections bloquantes (J+5, avant toute mise en ligne des pages Lumio Arc) : correction des contrastes, ajout des alt-texts sur toutes les images produit, pose des balises lang, remplacement des liens génériques. Charge estimée : 3 jours développeur front + 1 jour éditorial. Phase 2 — Conformité complète (J+21, avant activation des campagnes paid) : sous-titrage des vidéos (prestataire recommandé : Captivoice, devis 320 € HT pour les 3 vidéos), restructuration des PDF en documents balisés, refonte des formulaires avec labels explicites, audit navigation clavier complet. Charge estimée : 5 jours développeur + 2 jours content. Je reste disponible pour coordonner ce chantier, sous réserve d'un cadrage clair des priorités avec Sonia d'ici le 17 mars. Je signale en parallèle que la charge actuelle de production de contenus pour le lancement ne me permet pas d'absorber ce périmètre seul dans les délais demandés."
             },
             {
               "type": "callout",
@@ -106,7 +106,7 @@ window.LUMIO_DATA = {
           "blocks": [
             {
               "type": "p",
-              "text": "Ce tableau de référence a été constitué à partir de données publiques (rapports annuels, études Statista Q4 2024, analyses Similarweb janv.–fév. 2025) et de benchmarks sectoriels fournis par notre agence data Upturn Analytics. Il couvre quatre acteurs directs ou adjacents sur le segment wearables stress/bien-être en Europe. Objectif : calibrer des cibles réalistes de CAC, de taux de conversion et de ROAS pour le lancement du Serenity Pro, avant présentation à Northgate Capital."
+              "text": "Ce tableau de référence a été constitué à partir de données publiques (rapports annuels, études Statista Q4 2024, analyses Similarweb janv.–fév. 2025) et de benchmarks sectoriels fournis par notre agence data Upturn Analytics. Il couvre quatre acteurs directs ou adjacents sur le segment wearables stress/bien-être en Europe. Objectif : calibrer des cibles réalistes de CAC, de taux de conversion et de ROAS pour le lancement du Lumio Arc, avant présentation à Northgate Capital."
             },
             {
               "type": "h2",
@@ -118,19 +118,19 @@ window.LUMIO_DATA = {
             },
             {
               "type": "callout",
-              "text": "Médiane sectorielle retenue comme référentiel : CAC 49 € · Taux de conversion 2,7 % · ROAS 2,6x. Ces valeurs constituent le plancher d'exigence pour le Serenity Pro au lancement (M1–M3)."
+              "text": "Médiane sectorielle retenue comme référentiel : CAC 49 € · Taux de conversion 2,7 % · ROAS 2,6x. Ces valeurs constituent le plancher d'exigence pour le Lumio Arc au lancement (M1–M3)."
             },
             {
               "type": "h2",
-              "text": "Enseignements pour le calibrage Serenity Pro"
+              "text": "Enseignements pour le calibrage Lumio Arc"
             },
             {
               "type": "p",
-              "text": "Trois signaux ressortent de cette analyse. Premièrement, le couple prix élevé / CAC maîtrisé est atteignable uniquement sur des canaux à forte intention (Google Search, SEO éditorial médical) : Athos Mind en est la preuve, malgré un taux de conversion faible. Le Serenity Pro, positionné à 249 €, devra prioriser ces canaux pour ne pas dépasser 60 € de CAC en phase de lancement. Deuxièmement, le modèle hybride B2B/B2C de Fibion, avec un ROAS de 2,7x, est le plus transposable à notre réalité : les 180 comptes B2B existants constituent un levier d'activation organique à activer en priorité (Camille Ott à mobiliser dès S1). Troisièmement, le taux de retour produit de Biot Coach (11 %) illustre le risque d'un positionnement trop généraliste : une promesse UX claire et une onboarding app soignée sont des variables directement corrélées à la réduction des retours et à la progression du ROAS réel."
+              "text": "Trois signaux ressortent de cette analyse. Premièrement, le couple prix élevé / CAC maîtrisé est atteignable uniquement sur des canaux à forte intention (Google Search, SEO éditorial médical) : Athos Mind en est la preuve, malgré un taux de conversion faible. Le Lumio Arc, positionné à 249 €, devra prioriser ces canaux pour ne pas dépasser 60 € de CAC en phase de lancement. Deuxièmement, le modèle hybride B2B/B2C de Fibion, avec un ROAS de 2,7x, est le plus transposable à notre réalité : les 180 comptes B2B existants constituent un levier d'activation organique à activer en priorité (Camille Ott à mobiliser dès S1). Troisièmement, le taux de retour produit de Biot Coach (11 %) illustre le risque d'un positionnement trop généraliste : une promesse UX claire et une onboarding app soignée sont des variables directement corrélées à la réduction des retours et à la progression du ROAS réel."
             },
             {
               "type": "callout",
-              "text": "Objectifs cibles Serenity Pro — M1 à M6 : CAC ≤ 55 € (paid) · Taux de conversion ≥ 2,5 % · ROAS cible 2,8x · Taux de retour produit < 7 %. Ces seuils seront intégrés au dashboard temps réel présenté à Jakob Rein le 24 mars."
+              "text": "Objectifs cibles Lumio Arc — M1 à M6 : CAC ≤ 55 € (paid) · Taux de conversion ≥ 2,5 % · ROAS cible 2,8x · Taux de retour produit < 7 %. Ces seuils seront intégrés au dashboard temps réel présenté à Jakob Rein le 24 mars."
             },
             {
               "type": "h2",
@@ -138,7 +138,7 @@ window.LUMIO_DATA = {
             },
             {
               "type": "p",
-              "text": "Ces données reflètent des performances moyennes annuelles 2024 et ne distinguent pas les phases de lancement des phases de maturité. Les CAC observés chez Helo Wellness et Biot Coach intègrent des périodes de promotions agressives (Black Friday, soldes janvier) qui gonflent artificiellement les taux de conversion. Enfin, les benchmarks UK (Athos Mind) sont affectés par le contexte post-Brexit sur la logistique EU. Recommandation : réévaluer ce tableau à M3 avec nos propres données Serenity Pro pour ajuster les enchères et les mix canaux en conséquence."
+              "text": "Ces données reflètent des performances moyennes annuelles 2024 et ne distinguent pas les phases de lancement des phases de maturité. Les CAC observés chez Helo Wellness et Biot Coach intègrent des périodes de promotions agressives (Black Friday, soldes janvier) qui gonflent artificiellement les taux de conversion. Enfin, les benchmarks UK (Athos Mind) sont affectés par le contexte post-Brexit sur la logistique EU. Recommandation : réévaluer ce tableau à M3 avec nos propres données Lumio Arc pour ajuster les enchères et les mix canaux en conséquence."
             }
           ]
         }
@@ -154,7 +154,7 @@ window.LUMIO_DATA = {
       "pages": [
         {
           "kicker": "COMPTE RENDU INTERNE — CONFIDENTIEL",
-          "title": "Task Force Opération Cortisol Zero : arbitrages canaux et budget du lancement Serenity Pro",
+          "title": "Task Force Opération Cortisol Zero : arbitrages canaux et budget du lancement Lumio Arc",
           "byline": "Sonia Ferracci, Directrice Marketing · 14 mars 2025",
           "blocks": [
             {
@@ -201,18 +201,18 @@ window.LUMIO_DATA = {
       "id": "DOC-07",
       "type": "rich",
       "tab": "RAPPORT_",
-      "title": "Rapport analytics — Campagne bêta Serenity Pro · 30 premiers jours",
+      "title": "Rapport analytics — Campagne bêta Lumio Arc · 30 premiers jours",
       "accent": "#134547",
       "runningHead": "RAPPORT_ANALYTICS",
       "pages": [
         {
           "kicker": "RAPPORT ANALYTICS — USAGE INTERNE",
-          "title": "GA4 Campagne bêta Serenity Pro : résultats J+30 et points de friction identifiés",
+          "title": "GA4 Campagne bêta Lumio Arc : résultats J+30 et points de friction identifiés",
           "byline": "Yassine Morel, Content Manager · 14 mars 2025",
           "blocks": [
             {
               "type": "p",
-              "text": "Ce rapport synthétise les données collectées via Google Analytics 4 sur les 30 premiers jours de la phase bêta du Serenity Pro (12 février – 13 mars 2025). Il couvre le trafic organique et payant, les performances par canal d'acquisition, les comportements on-site et les premiers signaux de conversion. Ces données sont destinées à Sonia Ferracci et à la task force marketing dans le cadre de la préparation du dossier Northgate."
+              "text": "Ce rapport synthétise les données collectées via Google Analytics 4 sur les 30 premiers jours de la phase bêta du Lumio Arc (12 février – 13 mars 2025). Il couvre le trafic organique et payant, les performances par canal d'acquisition, les comportements on-site et les premiers signaux de conversion. Ces données sont destinées à Sonia Ferracci et à la task force marketing dans le cadre de la préparation du dossier Northgate."
             },
             {
               "type": "h2",
@@ -263,7 +263,7 @@ window.LUMIO_DATA = {
       "preview": "12 DRH grands comptes mobilisables en Q2 2025 — tunnel B2B distinct et contenus LinkedIn dédiés requis en urgence.",
       "kicker": "NOTE INTERNE — CONFIDENTIEL",
       "render": "plain",
-      "body": "Suite aux échanges menés entre janvier et mars 2025, 12 DRH de grands comptes ont manifesté un intérêt concret pour un déploiement du Serenity Pro dans le cadre de leurs dispositifs QVT. Profils identifiés : secteurs assurance (3), industrie (4), services financiers (3), retail (2). Tailles d'effectifs : 800 à 12 000 salariés. Budgets QVT Q2 déclarés entre 40 000 € et 180 000 €. Point de vigilance : ces interlocuteurs attendent un parcours de découverte distinct du canal grand public — démo produit dédiée, étude de cas ROI chiffrée, proposition tarifaire volume. Le tunnel e-commerce B2C standard ne leur correspond pas et risque de générer de la friction. Par ailleurs, trois DRH ont explicitement demandé des ressources LinkedIn à partager en interne (formats courts, visuels sobres, argumentaire bien-être au travail). Ces contenus n'existent pas encore dans notre bibliothèque. À intégrer dans le plan de lancement Sonia en priorité.",
+      "body": "Suite aux échanges menés entre janvier et mars 2025, 12 DRH de grands comptes ont manifesté un intérêt concret pour un déploiement du Lumio Arc dans le cadre de leurs dispositifs QVT. Profils identifiés : secteurs assurance (3), industrie (4), services financiers (3), retail (2). Tailles d'effectifs : 800 à 12 000 salariés. Budgets QVT Q2 déclarés entre 40 000 € et 180 000 €. Point de vigilance : ces interlocuteurs attendent un parcours de découverte distinct du canal grand public — démo produit dédiée, étude de cas ROI chiffrée, proposition tarifaire volume. Le tunnel e-commerce B2C standard ne leur correspond pas et risque de générer de la friction. Par ailleurs, trois DRH ont explicitement demandé des ressources LinkedIn à partager en interne (formats courts, visuels sobres, argumentaire bien-être au travail). Ces contenus n'existent pas encore dans notre bibliothèque. À intégrer dans le plan de lancement Sonia en priorité.",
       "byline": "Camille Ott (Responsable B2B, Lumio Health) · 14 mars 2025"
     },
     {
@@ -273,7 +273,7 @@ window.LUMIO_DATA = {
       "preview": "Cadrage opérationnel pour la présentation board du 24 mars : format, KPIs attendus et points de vigilance narratif.",
       "kicker": "NOTE INTERNE CONFIDENTIELLE",
       "render": "plain",
-      "body": "Format imposé : 15 minutes chrono, sans dépassement. Jakob Rein a confirmé qu'il veut voir le tableau de bord de pilotage en live — prévoir une démo fonctionnelle sur Data Studio ou équivalent, pas de capture statique. Les KPIs à faire apparaître en priorité : CAC cible B2C (≤ 38 €), taux de conversion e-commerce (objectif 3,2 %), pipeline B2B qualifié (valeur contrats DRH, 12 comptes cibles identifiés). Théo insiste sur la cohérence digital / distribution physique : les 12 pharmacies partenaires parisiennes doivent apparaître explicitement dans le parcours omnicanal — carte interactive ou schéma de flux obligatoire. Sur la conformité : anticiper une question de Jakob sur le RGPD et une de Théo sur le RGAA — avoir les réponses prêtes, ne pas les noyer dans les slides. Narratif attendu : partir du problème marché (stress professionnel, 3,2 M de salariés concernés en France), ancrer le Serenity Pro comme réponse mesurable, puis dérouler le plan d'activation avec jalons clairs à 30-60-90 jours. Éviter les slides de contexte génériques : Northgate connaît le secteur, ils veulent du chiffré et de l'actionnable. Préparer une slide de risques assumés — Jakob sanctionne davantage l'absence d'anticipation que les risques eux-mêmes.",
+      "body": "Format imposé : 15 minutes chrono, sans dépassement. Jakob Rein a confirmé qu'il veut voir le tableau de bord de pilotage en live — prévoir une démo fonctionnelle sur Data Studio ou équivalent, pas de capture statique. Les KPIs à faire apparaître en priorité : CAC cible B2C (≤ 38 €), taux de conversion e-commerce (objectif 3,2 %), pipeline B2B qualifié (valeur contrats DRH, 12 comptes cibles identifiés). Théo insiste sur la cohérence digital / distribution physique : les 12 pharmacies partenaires parisiennes doivent apparaître explicitement dans le parcours omnicanal — carte interactive ou schéma de flux obligatoire. Sur la conformité : anticiper une question de Jakob sur le RGPD et une de Théo sur le RGAA — avoir les réponses prêtes, ne pas les noyer dans les slides. Narratif attendu : partir du problème marché (stress professionnel, 3,2 M de salariés concernés en France), ancrer le Lumio Arc comme réponse mesurable, puis dérouler le plan d'activation avec jalons clairs à 30-60-90 jours. Éviter les slides de contexte génériques : Northgate connaît le secteur, ils veulent du chiffré et de l'actionnable. Préparer une slide de risques assumés — Jakob sanctionne davantage l'absence d'anticipation que les risques eux-mêmes.",
       "byline": "Sonia Ferracci (Directrice Marketing, Lumio Health) · 14 mars 2025"
     }
   ],
@@ -502,7 +502,7 @@ window.LUMIO_DATA = {
     "events": {
       "14": [
         {
-          "label": "Kick-off · Opération Cortisol Zero — Lancement digital du bracelet Lumio Serenity Pro",
+          "label": "Kick-off · Opération Cortisol Zero — Lancement digital du bracelet Lumio Lumio Arc",
           "bg": "#3a7bd5",
           "color": "#fff",
           "bold": true
@@ -611,7 +611,7 @@ window.LUMIO_DATA = {
           "avatar": "SF",
           "color": "#134547",
           "time": "08:47",
-          "text": "Bonjour {{PRENOM}} — bienvenue dans la task force Cortisol Zero 👋 Tu arrives à un moment charnière, le lancement Serenity Pro est fixé et Northgate ne nous laisse pas beaucoup de marge"
+          "text": "Bonjour {{PRENOM}} — bienvenue dans la task force Cortisol Zero 👋 Tu arrives à un moment charnière, le lancement Lumio Arc est fixé et Northgate ne nous laisse pas beaucoup de marge"
         },
         {
           "from": "Sonia Ferracci",
@@ -631,7 +631,7 @@ window.LUMIO_DATA = {
     }
   },
   "slackPrompts": {
-    "commanditaire": "Tu es Sonia Ferracci, Directrice Marketing, Lumio Health chez Lumio Health. Tu réponds à {{PRENOM}}, consultant·e externe sur la mission \"Opération Cortisol Zero — Lancement digital du bracelet Lumio Serenity Pro\". Tu évalues sans expliquer, tu relances sans donner la réponse, tu simules la pression hiérarchique. Tu réponds en 2-3 messages courts séparés par ---SPLIT---. Pas de longs développements.",
+    "commanditaire": "Tu es Sonia Ferracci, Directrice Marketing, Lumio Health chez Lumio Health. Tu réponds à {{PRENOM}}, consultant·e externe sur la mission \"Opération Cortisol Zero — Lancement digital du bracelet Lumio Lumio Arc\". Tu évalues sans expliquer, tu relances sans donner la réponse, tu simules la pression hiérarchique. Tu réponds en 2-3 messages courts séparés par ---SPLIT---. Pas de longs développements.",
     "commanditaireLivrable": "Tu es Sonia Ferracci. Tu viens de recevoir le livrable de {{PRENOM}}. Tu réagis en 2-3 messages courts séparés par ---SPLIT---. Tu pointes ce qui te paraît juste et ce qui te paraît faible, sans expliquer comment corriger."
   },
   "pressArticles": [
@@ -644,7 +644,7 @@ window.LUMIO_DATA = {
       "date": "11 mars 2025",
       "headline": "Wearables santé : le grand test du marché grand public",
       "lede": "Longtemps cantonnés aux flottes entreprises et aux protocoles médicaux, les bracelets connectés de bien-être tentent en 2025 leur percée B2C. Entre promesses technologiques et exigences réglementaires, l'équation reste complexe.",
-      "illustration": "PHOTO ILLUSTRATIVE",
+      "illustration": "portraits/Theo_Marczak.png",
       "body": "Le marché européen des wearables de santé au travail affiche une croissance de 18 % en 2024, selon le cabinet Frost & Sullivan. Pourtant, la majorité des acteurs du secteur restent prisonniers d'un modèle B2B qui plafonne naturellement autour de quelques centaines de comptes grands groupes. La question qui agite désormais les directions marketing de ces startups : comment franchir le pas vers le consommateur final sans diluer la crédibilité médicale qui fonde leur différenciation ?\n\nLes investisseurs, eux, ne cachent plus leur impatience. Plusieurs fonds de capital-risque spécialisés healthtech ont conditionné leurs tours de table 2025 à des feuilles de route B2C documentées, avec des indicateurs de conversion e-commerce clairs et des délais de mise en marché resserrés. 'On attend des stratégies omnicanales, pas des PowerPoints,' résume un partner d'un fonds parisien qui préfère rester anonyme.\n\nCôté exécution, le chantier est considérable. Construire une présence digitale crédible auprès du grand public suppose de repenser intégralement l'architecture de contenu : landing pages optimisées SEO, tunnel d'achat fluide, stratégie de réassurance par les données cliniques. Plusieurs acteurs du secteur ont sous-estimé le coût de cette transformation, oscillant entre 1,5 et 3 millions d'euros pour un lancement paneuropéen sérieux.\n\nLa question de l'accessibilité numérique s'impose également comme un enjeu non négligeable. Depuis l'entrée en vigueur progressive du European Accessibility Act, dont les premières échéances contraignent les services numériques à partir de juin 2025, les équipes produit et content des startups healthtech doivent intégrer les référentiels d'accessibilité dès la phase de conception. 'C'est un sujet que beaucoup traitent en bout de chaîne, alors que ça devrait structurer la production de contenu dès le départ,' observe Delphine Cazes, consultante accessibilité chez Atalan.\n\nLe RGPD ajoute une couche de complexité supplémentaire pour les acteurs manipulant des données physiologiques. Les bracelets de mesure du stress collectent par définition des données de santé au sens de l'article 9 du règlement européen, ce qui impose des bases légales renforcées, des durées de conservation strictes et une information transparente de l'utilisateur. Plusieurs startups ont déjà essuyé des mises en demeure de la CNIL sur ce point précis.\n\nPour les DRH grands comptes, l'arrivée d'une offre B2C de ces mêmes fabricants est perçue avec des sentiments mêlés. D'un côté, une visibilité accrue du produit peut faciliter l'adhésion des salariés. De l'autre, certains responsables RH craignent un nivellement par le bas de l'accompagnement et du suivi des données agrégées qu'ils négocient aujourd'hui dans leurs contrats B2B.\n\nLes prochains mois seront décisifs. Au moins trois acteurs français du secteur devraient annoncer des lancements grand public avant l'été, dans un marché où Garmin, Fitbit et Withings occupent déjà des positions confortables. La différenciation par la santé mentale et la mesure du cortisol pourrait constituer un angle porteur — à condition de disposer d'une stratégie digitale réellement intégrée et d'un modèle e-commerce rentable dès les premiers trimestres."
     }
   ],
@@ -665,7 +665,7 @@ window.PAC_CONFIG = {
   accroche_namescreen: {
     "subtitle": "Stratégie marketing digital & e-commerce",
     "role": "consultant·e marketing digital",
-    "intro": "Tu es {{STUDENT}}, consultant·e marketing digital chez Lumio Health pour l'Opération Cortisol Zero — le lancement digital du bracelet Lumio Serenity Pro. Stratégie d'acquisition, contenus accessibles, mesure d'efficacité, rentabilité e-commerce : tu produis la stratégie de marketing digital et e-commerce (E4-I).",
+    "intro": "Tu es {{STUDENT}}, consultant·e marketing digital chez Lumio Health pour l'Opération Cortisol Zero — le lancement digital du bracelet Lumio Lumio Arc. Stratégie d'acquisition, contenus accessibles, mesure d'efficacité, rentabilité e-commerce : tu produis la stratégie de marketing digital et e-commerce (E4-I).",
     "ratio_label": "3 semaines dans la vraie vie",
     "regles": [
       {
@@ -688,7 +688,7 @@ window.PAC_CONFIG = {
   "commanditaire": "Sonia Ferracci",
   "entreprise": "Lumio Health",
   "dispositif": "PAC",
-  "accroche": "Tu es mandaté·e par <strong>Sonia Ferracci, Directrice Marketing de Lumio Health</strong>, pour concevoir la stratégie de marketing digital et e-commerce de l'<em>Opération Cortisol Zero</em> — le lancement du bracelet Lumio Serenity Pro. Positionnement en ligne, sélection des canaux, contenus accessibles, KPI, optimisation du parcours d'achat et rentabilité e-commerce&nbsp;: tout reste à construire. Jakob Rein (Northgate Capital) surveille de près les métriques d'acquisition. Sonia attend une proposition structurée, pas une liste de bonnes pratiques. <em>Le produit est prêt. Le marché ne t'attend pas.</em>",
+  "accroche": "Tu es mandaté·e par <strong>Sonia Ferracci, Directrice Marketing de Lumio Health</strong>, pour concevoir la stratégie de marketing digital et e-commerce de l'<em>Opération Cortisol Zero</em> — le lancement du bracelet Lumio Lumio Arc. Positionnement en ligne, sélection des canaux, contenus accessibles, KPI, optimisation du parcours d'achat et rentabilité e-commerce&nbsp;: tout reste à construire. Jakob Rein (Northgate Capital) surveille de près les métriques d'acquisition. Sonia attend une proposition structurée, pas une liste de bonnes pratiques. <em>Le produit est prêt. Le marché ne t'attend pas.</em>",
   "note_reflexive": false,
   "temps": [
     {
@@ -733,7 +733,7 @@ window.PAC_CONFIG = {
       "label": "Élaborer une stratégie de marketing digital intégrée au plan de développement global du commanditaire",
       "libelle": "Élaborer une",
       "rncp": "Élaborer une stratégie de marketing digital intégrée au plan de développement global du commanditaire, en déterminant le positionnement et les modalités de présence en ligne, en sélectionnant les outils et supports de communication adaptés, et en définissant les actions pour l'optimisation de la visibilité en ligne et l'acquisition de l'audience, ainsi que les indicateurs de performance (KPI) à améliorer, afin d'assurer une cohérence avec les canaux de communication et de distribution physiques.",
-      "placeholder": "Présentez la stratégie digitale globale de Lumio Health pour le lancement Serenity Pro : positionnement en ligne, canaux retenus (LinkedIn B2B, Instagram B2C, site e-commerce, partenariats médias santé…), articulation avec la distribution physique (pharmacies partenaires, showrooms pop-up), KPI cibles (CAC, reach, taux d'engagement) et cohérence avec le plan de développement 2025 présenté à Northgate.",
+      "placeholder": "Présentez la stratégie digitale globale de Lumio Health pour le lancement Lumio Arc : positionnement en ligne, canaux retenus (LinkedIn B2B, Instagram B2C, site e-commerce, partenariats médias santé…), articulation avec la distribution physique (pharmacies partenaires, showrooms pop-up), KPI cibles (CAC, reach, taux d'engagement) et cohérence avec le plan de développement 2025 présenté à Northgate.",
       "min": 300,
       "motsCles": [
         "positionnement digital",
@@ -796,7 +796,7 @@ window.PAC_CONFIG = {
       "label": "Optimiser la rentabilité des activités e-commerce",
       "libelle": "Optimiser la",
       "rncp": "Optimiser la rentabilité des activités e-commerce, en adoptant une approche business d'analyse des coûts d'acquisition, de la rentabilité et des taux de marge, et en adaptant le parcours d'achat client, afin d'améliorer la conversion et la performance globale des ventes en ligne.",
-      "placeholder": "Analysez la rentabilité e-commerce du Serenity Pro : modélisez le coût d'acquisition par canal (Google Ads, LinkedIn Ads, influence santé), calculez le ROI et le ROAS cibles pour justifier l'enveloppe de 2,3 M€ demandée à Northgate, cartographiez le parcours d'achat client actuel (points de friction identifiés par Camille Ott), proposez des actions d'optimisation (UX checkout, upsell abonnement app, relance panier abandonné), et définissez les taux de conversion cibles par segment.",
+      "placeholder": "Analysez la rentabilité e-commerce du Lumio Arc : modélisez le coût d'acquisition par canal (Google Ads, LinkedIn Ads, influence santé), calculez le ROI et le ROAS cibles pour justifier l'enveloppe de 2,3 M€ demandée à Northgate, cartographiez le parcours d'achat client actuel (points de friction identifiés par Camille Ott), proposez des actions d'optimisation (UX checkout, upsell abonnement app, relance panier abandonné), et définissez les taux de conversion cibles par segment.",
       "min": 250,
       "motsCles": [
         "ROI",
@@ -815,7 +815,7 @@ window.PAC_CONFIG = {
   ],
   "gabarits": {},
   "questionsPositionnement": [],
-  "juryPrompt": "Tu es le jury certifiant du bloc bc4-i (Manager en stratégie et développement de projet digital).\nContexte : Opération Cortisol Zero — Lancement digital du bracelet Lumio Serenity Pro · 14 mars 2025.\nTu évalues une production étudiante aux critères RNCP stricts. Sois exigeant mais juste.\nCritères éliminatoires :\n- Absence de définition explicite des rôles et responsabilités au sein de l'équipe projet (Sonia, Yassine, Camille) dans la mise en œuvre de la stratégie digitale.\n- Aucun indicateur d'impact quantitatif (KPI chiffrés, objectifs de conversion, seuils de ROI/ROAS) n'est défini pour au moins deux des quatre compétences traitées.\n- La stratégie digitale est présentée comme un plan autonome sans articulation démontrée avec les canaux de distribution physique ou le plan de développement global de Lumio Health.\n- Absence totale de référence aux obligations légales RGPD dans le dispositif de collecte et de traitement des données utilisateurs.\n- Les principes d'accessibilité numérique (RGAA) ne sont pas mentionnés ou sont traités comme une option sans lien avec la stratégie éditoriale.\n- Le volet e-commerce ne comporte aucune modélisation financière (CAC, ROI, taux de marge) permettant d'évaluer la viabilité du lancement Serenity Pro.\n- La proposition ignore complètement le segment B2B identifié par Camille Ott, laissant une cible stratégique majeure sans dispositif digital dédié.\n\nRéponds EXACTEMENT dans ce format :\n### C.22-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### C.23-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### C.24-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### C.25-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n## Niveau global\n**[Non conforme / Partiellement conforme / Conforme / Conforme avec distinction]**\n\n## Question de jury\nUne question dérangeante que tu poserais à l'oral.",
+  "juryPrompt": "Tu es le jury certifiant du bloc bc4-i (Manager en stratégie et développement de projet digital).\nContexte : Opération Cortisol Zero — Lancement digital du bracelet Lumio Lumio Arc · 14 mars 2025.\nTu évalues une production étudiante aux critères RNCP stricts. Sois exigeant mais juste.\nCritères éliminatoires :\n- Absence de définition explicite des rôles et responsabilités au sein de l'équipe projet (Sonia, Yassine, Camille) dans la mise en œuvre de la stratégie digitale.\n- Aucun indicateur d'impact quantitatif (KPI chiffrés, objectifs de conversion, seuils de ROI/ROAS) n'est défini pour au moins deux des quatre compétences traitées.\n- La stratégie digitale est présentée comme un plan autonome sans articulation démontrée avec les canaux de distribution physique ou le plan de développement global de Lumio Health.\n- Absence totale de référence aux obligations légales RGPD dans le dispositif de collecte et de traitement des données utilisateurs.\n- Les principes d'accessibilité numérique (RGAA) ne sont pas mentionnés ou sont traités comme une option sans lien avec la stratégie éditoriale.\n- Le volet e-commerce ne comporte aucune modélisation financière (CAC, ROI, taux de marge) permettant d'évaluer la viabilité du lancement Lumio Arc.\n- La proposition ignore complètement le segment B2B identifié par Camille Ott, laissant une cible stratégique majeure sans dispositif digital dédié.\n\nRéponds EXACTEMENT dans ce format :\n### C.22-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### C.23-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### C.24-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### C.25-I — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n## Niveau global\n**[Non conforme / Partiellement conforme / Conforme / Conforme avec distinction]**\n\n## Question de jury\nUne question dérangeante que tu poserais à l'oral.",
   "livrableMinMots": 520,
   "noteReflexiveMinMots": 100
 };
