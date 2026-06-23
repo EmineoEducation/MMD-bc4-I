@@ -21,7 +21,7 @@ function NotepadApp() {
       </div>
       <textarea value={text} onChange={(e) => setText(e.target.value)}
         placeholder={np.placeholder || "Tes pensées au fil de l'eau pendant que tu lis le dossier."}
-        style={{ flex: 1, width: '100%', padding: '20px 26px', border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-display)', fontSize: 15, lineHeight: 1.75, color: 'var(--ink)', resize: 'none', backgroundImage: 'repeating-linear-gradient(transparent, transparent 30px, rgba(20,24,36,0.06) 30px, rgba(20,24,36,0.06) 31px)' }} />
+        style={{ flex: 1, width: '100%', padding: '7px 26px 20px', border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-display)', fontSize: 16, lineHeight: '31px', color: 'var(--ink)', resize: 'none', backgroundImage: 'repeating-linear-gradient(transparent, transparent 30px, rgba(20,24,36,0.06) 30px, rgba(20,24,36,0.06) 31px)', backgroundAttachment: 'local' }} />
       <div style={{ padding: '8px 22px', borderTop: '1px solid rgba(20,24,36,0.08)', display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-mute)', fontFamily: 'var(--font-mono)' }}>
         <span>{wordCount} mots</span><span>auto-saved · ⌘S</span>
       </div>

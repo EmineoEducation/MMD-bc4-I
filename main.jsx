@@ -506,5 +506,16 @@ function Root() {
   );
 }
 
+// Titre d'onglet piloté par la config — jamais codé en dur par bloc.
+(function setDocTitle() {
+  try {
+    const c = window.PAC_CONFIG || {};
+    const ent = c.entreprise || 'Lumio Health';
+    const bloc = (c.bloc || '').toUpperCase();
+    const disp = c.dispositif || 'PAC';
+    document.title = [disp, ent, bloc].filter(Boolean).join(' · ');
+  } catch (e) {}
+})();
+
 // Mount
 ReactDOM.createRoot(document.getElementById('root')).render(<Root />);

@@ -60,7 +60,7 @@ function Win({ win, onFocus, onClose, onMinimize, onMove, onResize }) {
           <button onClick={(e) => { e.stopPropagation(); onMinimize(win.id); }} style={trafficLight('#fdbc40')} />
           <button onClick={(e) => { e.stopPropagation(); onFocus(win.id, 'toggleMax'); }} style={trafficLight('#34c84a')} />
         </div>
-        <div style={{ flex: 1, textAlign: 'center', fontSize: 12, fontWeight: 600, color: win.focused ? 'var(--ink)' : 'var(--ink-mute)' }}>{meta.title}</div>
+        <div style={{ flex: 1, textAlign: 'center', fontSize: 12, fontWeight: 600, color: win.focused ? 'var(--ink)' : 'var(--ink-mute)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 8px' }}>{winTitle(win)}</div>
         <div style={{ width: 60 }} />
       </div>
       <div style={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
@@ -74,6 +74,25 @@ function Win({ win, onFocus, onClose, onMinimize, onMove, onResize }) {
 }
 
 const trafficLight = (color) => ({ width: 12, height: 12, borderRadius: '50%', background: color, border: 'none', padding: 0, cursor: 'pointer', boxShadow: 'inset 0 0 0 0.5px rgba(0,0,0,0.2)' });
+
+// ═════ Titre dynamique par fenêtre (multi-instance) ═════════
+// Base = APP_META[app].title ; suffixe = nom de la cible ouverte.
+function winTitle(win) {
+  const base = (APP_META[win.app] && APP_META[win.app].title) || win.app;
+  const D = window.LUMIO_DATA || {};
+  const p = win.props || {};
+  let target = '';
+  try {
+    if (p.openDoc) { const d = (D.dossiers || []).find(x => x.id === p.openDoc); target = d && (d.tab || d.title); }
+    else if (p.openId) { const m = (D.mailbox || []).find(x => x.id === p.openId); target = m && m.subject; }
+    else if (p.openNote) { const n = (D.notes || []).find(x => x.id === p.openNote); target = n && n.title; }
+    else if (p.openPortrait) { const pr = (D.portraits || []).find(x => x.key === p.openPortrait); target = pr && (pr.tabTitle || pr.title); }
+    else if (p.openFolder) { const f = (D.finder && D.finder.folders && D.finder.folders[p.openFolder]); target = f && f.title; }
+  } catch (e) {}
+  if (!target) return base;
+  const t = target.length > 42 ? target.slice(0, 40) + '…' : target;
+  return base + ' — ' + t;
+}
 
 // ═════ Temps fictif (lu depuis D.fictif) ════════════════════
 const _F = (window.LUMIO_DATA && window.LUMIO_DATA.fictif) || {};
@@ -183,30 +202,49 @@ function Dock({ openApp, openWindows, livrableUnlocked }) {
 }
 
 // ═════ Desktop icons (labels lus depuis D.desktopIcons) ══════
-function DesktopIcons({ openApp }) {
+function DesktopIcons({ openApp, livrableUnlocked }) {
   const D = window.LUMIO_DATA || {};
+  const cfg = window.PAC_CONFIG || {};
   const icons = D.desktopIcons || [
-    { app: 'finder', folder: 'mission', label: 'Mission', kind: 'folder' },
+    { app: 'finder', folder: 'guide', label: 'Mission', kind: 'folder' },
     { app: 'finder', folder: 'portraits', label: 'Portraits équipe', kind: 'folder' },
-    { app: 'mail', label: 'Mail.app', kind: 'app' },
-    { app: 'slack', label: 'Slack.app', kind: 'app' },
+    { app: 'mail', label: 'Mail', kind: 'app' },
+    { app: 'slack', label: 'Slack', kind: 'app' },
     { app: 'notepad', label: 'Mes notes.txt', kind: 'app' }
   ];
+  const openIcon = (it) => {
+    if (it.kind === 'folder') openApp(it.app, { openFolder: it.folder });
+    else openApp(it.app, it.props || {});
+  };
+  const LivrableIcon = window.LivrableIcon;
   return (
     <>
       {icons.map((it, i) => {
         const meta = APP_META[it.app];
-        const Icon = it.kind === 'folder' ? window.FolderIcon : window[meta.icon];
+        const Icon = it.kind === 'folder' ? window.FolderIcon : (meta && window[meta.icon]);
+        if (!Icon) return null;
         const x = it.x != null ? it.x : 36;
         const y = it.y != null ? it.y : 56 + i * 118;
         return (
-          <div key={i} onDoubleClick={() => openApp(it.app, it.kind === 'folder' ? { openFolder: it.folder } : {})} onClick={() => openApp(it.app, it.kind === 'folder' ? { openFolder: it.folder } : {})}
+          <div key={i} onDoubleClick={() => openIcon(it)} onClick={() => openIcon(it)}
             style={{ position: 'absolute', left: x, top: y, width: 88, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', padding: 6, borderRadius: 4 }}>
             <Icon size={56} />
             <div style={{ fontSize: 12, color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.6)', marginTop: 4, textAlign: 'center', padding: '1px 5px', borderRadius: 2, lineHeight: 1.2 }}>{it.label}</div>
           </div>
         );
       })}
+
+      {/* Icône Livrable proéminente — bureau (haut-droite), titre visible, badge si débloqué */}
+      <div onDoubleClick={() => openApp('livrable')} onClick={() => openApp('livrable')}
+        title="Déposer ton livrable certifiant"
+        style={{ position: 'absolute', right: 30, top: 70, width: 96, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', padding: 8, borderRadius: 8 }}>
+        <div style={{ position: 'relative' }}>
+          {LivrableIcon ? <LivrableIcon size={62} /> : <span style={{ fontSize: 52 }}>📦</span>}
+          {livrableUnlocked && <div style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#34c84a', border: '2px solid white', fontSize: 9, color: 'white', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</div>}
+        </div>
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.7)', marginTop: 5, textAlign: 'center', lineHeight: 1.2 }}>Livrable</div>
+        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.92)', textShadow: '0 1px 2px rgba(0,0,0,0.7)', textAlign: 'center', lineHeight: 1.2, marginTop: 1 }}>{(cfg.epreuve || '').split('.')[0] || 'À rendre'}</div>
+      </div>
     </>
   );
 }
@@ -358,16 +396,29 @@ function Desktop({ onLogout }) {
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  // Signature d'une cible : deux ouvertures avec la même cible = même fenêtre.
+  // Cibles distinctes (autre doc, autre portrait, autre dossier) = nouvelles fenêtres.
+  // Exception : le navigateur reste une fenêtre unique et accumule les onglets
+  // (portraits, articles), comme un vrai navigateur.
+  const winSignature = (app, props = {}) => {
+    if (app === 'browser') return 'browser::single';
+    const p = props || {};
+    const key = p.openDoc || p.openId || p.openNote || p.openPortrait || p.openFolder || p.openTab || '';
+    return app + '::' + key;
+  };
+
   const openApp = (app, props = {}) => {
     const meta = APP_META[app];
     if (!meta) return;
     if (window.__onAppOpened) window.__onAppOpened(app);
     setWindows(ws => {
-      const existing = ws.find(w => w.app === app);
+      const sig = winSignature(app, props);
+      const existing = ws.find(w => w.sig === sig);
       const nz = zCounter + 1; setZCounter(nz);
-      if (existing) return ws.map(w => w.app === app ? { ...w, minimized: false, focused: true, z: nz, props: { ...w.props, ...props } } : { ...w, focused: false });
-      const offset = ws.length * 26;
-      return [...ws.map(w => ({ ...w, focused: false })), { id: app + '-' + Date.now(), app, props, x: 120 + offset, y: 70 + offset, w: meta.w, h: meta.h, z: nz, focused: true, minimized: false, maximized: false }];
+      // Même cible déjà ouverte → focus + remontée, pas de doublon.
+      if (existing) return ws.map(w => w.sig === sig ? { ...w, minimized: false, focused: true, z: nz, props: { ...w.props, ...props } } : { ...w, focused: false });
+      const offset = (ws.length % 8) * 28;
+      return [...ws.map(w => ({ ...w, focused: false })), { id: app + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), sig, app, props, x: 120 + offset, y: 70 + offset, w: meta.w, h: meta.h, z: nz, focused: true, minimized: false, maximized: false }];
     });
   };
   const focusWin = (id, action) => setWindows(ws => { const nz = zCounter + 1; setZCounter(nz); return ws.map(w => w.id === id ? { ...w, focused: true, z: nz, maximized: action === 'toggleMax' ? !w.maximized : w.maximized, minimized: false } : { ...w, focused: false }); });
@@ -379,14 +430,14 @@ function Desktop({ onLogout }) {
   const clickNotif = (n) => { if (n.click) openApp(n.click.app, n.click.props || {}); dismissNotif(n.id); };
 
   const focusedWin = windows.find(w => w.focused);
-  const activeAppTitle = focusedWin ? APP_META[focusedWin.app].title : 'Finder';
+  const activeAppTitle = focusedWin ? winTitle(focusedWin) : 'Finder';
 
   return (
     <WindowsCtx.Provider value={{ open: openApp }}>
       <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', userSelect: 'none' }}>
         <Wallpaper />
         <MenuBar activeApp={activeAppTitle} openLogout={onLogout} />
-        <DesktopIcons openApp={openApp} />
+        <DesktopIcons openApp={openApp} livrableUnlocked={livrableUnlocked} />
         {windows.map(w => <Win key={w.id} win={w} onFocus={focusWin} onClose={closeWin} onMinimize={minimizeWin} onMove={moveWin} onResize={resizeWin} />)}
         <Dock openApp={openApp} openWindows={windows} livrableUnlocked={livrableUnlocked} />
         <PacTimeline />
@@ -402,40 +453,84 @@ function Desktop({ onLogout }) {
 }
 
 // ═════ Jefferson FAB ═══════════════════════════════════════
-// Bouton flottant en bas à droite (hors dock). 3 états visuels :
-// idle (gris), talking (animé quand fenêtre ouverte), alert (badge rouge).
+// Compagnon flottant bas-droite (hors dock). Présence de marque assumée :
+// pastille pétrole→menthe, anneau, bulle d'accroche périodique (découvrabilité),
+// label explicite, micro-animations. États : idle / talking (fenêtre ouverte).
 function JeffersonFab({ openApp, isOpen }) {
   const Icon = window.JeffersonIcon;
   const [hover, setHover] = useWmState(false);
+  const [hint, setHint] = useWmState(false);
+  const [dismissed, setDismissed] = useWmState(false);
+
   useWmEffect(() => {
     if (!document.getElementById('jefferson-fab-style')) {
       const s = document.createElement('style'); s.id = 'jefferson-fab-style';
-      s.textContent = '@keyframes jefferson-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}.jefferson-talking{animation:jefferson-pulse 1.4s ease-in-out infinite}';
+      s.textContent = `
+        @keyframes jeff-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        @keyframes jeff-in{0%{opacity:0;transform:translateY(14px) scale(.8)}100%{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes jeff-ring{0%{box-shadow:0 0 0 0 rgba(93,226,152,0.5)}70%{box-shadow:0 0 0 14px rgba(93,226,152,0)}100%{box-shadow:0 0 0 0 rgba(93,226,152,0)}}
+        @keyframes jeff-hint{0%{opacity:0;transform:translateX(10px)}100%{opacity:1;transform:translateX(0)}}
+        .jeff-talking{animation:jeff-pulse 1.5s ease-in-out infinite}
+        .jeff-ring{animation:jeff-ring 2.4s ease-out infinite}
+      `;
       document.head.appendChild(s);
     }
   }, []);
+
+  // Bulle d'accroche : apparaît à ~8s puis périodiquement tant que Jefferson n'a pas été ouvert.
+  useWmEffect(() => {
+    if (dismissed || isOpen) { setHint(false); return; }
+    const first = setTimeout(() => setHint(true), 8000);
+    const hideFirst = setTimeout(() => setHint(false), 8000 + 9000);
+    const loop = setInterval(() => {
+      setHint(true); setTimeout(() => setHint(false), 9000);
+    }, 60000);
+    return () => { clearTimeout(first); clearTimeout(hideFirst); clearInterval(loop); };
+  }, [dismissed, isOpen]);
+
+  const open = () => { setDismissed(true); setHint(false); openApp('jefferson'); };
+  const state = isOpen ? 'talking' : 'idle';
+  const showHint = hint && !isOpen && !dismissed;
+
   return (
-    <button
-      onClick={() => openApp('jefferson')}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      title="Jefferson · Guide PAC"
-      className={isOpen ? 'jefferson-talking' : ''}
-      style={{
-        position: 'fixed', bottom: 22, right: 22, zIndex: 9998,
-        width: 60, height: 60, borderRadius: '50%',
-        background: 'rgba(245,243,239,0.78)',
-        backdropFilter: 'blur(20px) saturate(1.4)',
-        WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
-        border: '1px solid rgba(255,255,255,0.5)',
-        boxShadow: hover ? '0 14px 36px rgba(20,24,36,0.28)' : '0 8px 22px rgba(20,24,36,0.18)',
-        cursor: 'pointer', padding: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'transform 220ms cubic-bezier(.34,1.56,.64,1), box-shadow 220ms ease',
-        transform: hover ? 'translateY(-3px) scale(1.04)' : 'none'
-      }}>
-      {Icon ? <Icon size={42} /> : <span style={{ fontSize: 24 }}>🐰</span>}
-    </button>
+    <div style={{ position: 'fixed', bottom: 18, right: 20, zIndex: 9998, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, animation: 'jeff-in 420ms cubic-bezier(.34,1.56,.64,1)' }}>
+      {/* Bulle d'accroche */}
+      {showHint && (
+        <div onClick={open}
+          style={{ position: 'absolute', bottom: 78, right: 0, width: 210, background: 'white', borderRadius: 14, borderBottomRightRadius: 4, padding: '11px 14px', boxShadow: '0 12px 30px rgba(11,43,45,0.22), 0 0 0 0.5px rgba(20,24,36,0.06)', cursor: 'pointer', animation: 'jeff-hint 300ms ease-out' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#134547', marginBottom: 2 }}>Jefferson, ton guide</div>
+          <div style={{ fontSize: 11.5, color: 'var(--ink-soft)', lineHeight: 1.45 }}>Bloqué·e ? Je t'oriente sans te donner les réponses. Clique quand tu veux.</div>
+          <button onClick={(e) => { e.stopPropagation(); setDismissed(true); setHint(false); }}
+            style={{ position: 'absolute', top: 6, right: 8, background: 'transparent', border: 'none', color: 'var(--ink-faint)', fontSize: 13, cursor: 'pointer', lineHeight: 1 }}>×</button>
+        </div>
+      )}
+
+      {/* Pastille compagnon */}
+      <button
+        onClick={open}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        title="Jefferson · ton guide de mission"
+        className={isOpen ? 'jeff-talking' : (showHint ? 'jeff-ring' : '')}
+        style={{
+          width: 74, height: 74, borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 30%, #5DE298 0%, #1f8f5e 55%, #134547 100%)',
+          border: '2.5px solid rgba(255,255,255,0.92)',
+          boxShadow: hover ? '0 18px 40px rgba(11,43,45,0.4)' : '0 10px 26px rgba(11,43,45,0.3)',
+          cursor: 'pointer', padding: 0, position: 'relative',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'transform 240ms cubic-bezier(.34,1.56,.64,1), box-shadow 240ms ease',
+          transform: hover ? 'translateY(-4px) scale(1.06)' : 'none'
+        }}>
+        <div style={{ width: 54, height: 54, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: 'inset 0 0 0 0.5px rgba(20,24,36,0.08)' }}>
+          {Icon ? <Icon size={50} state={state} /> : <span style={{ fontSize: 26 }}>🐰</span>}
+        </div>
+        {/* Pastille de présence */}
+        <span style={{ position: 'absolute', bottom: 3, right: 3, width: 15, height: 15, borderRadius: '50%', background: isOpen ? '#34c84a' : '#5DE298', border: '2.5px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+      </button>
+
+      <div style={{ fontSize: 11.5, fontWeight: 700, color: 'white', textShadow: '0 1px 4px rgba(11,43,45,0.65)', letterSpacing: '0.01em', pointerEvents: 'none' }}>Jefferson</div>
+    </div>
   );
 }
 
