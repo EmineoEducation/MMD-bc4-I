@@ -99,7 +99,7 @@ function NameScreen({ onConfirm }) {
     }}>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 8 }}>{(window.PAC_CONFIG ? window.PAC_CONFIG.dispositif + ' · ' + window.PAC_CONFIG.bloc : 'PAC')}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 200, letterSpacing: '-0.02em', marginBottom: 8, textShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>Lumio Health</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, opacity: 0.7, marginBottom: 40 }}>{(window.PAC_CONFIG && window.PAC_CONFIG.accroche_namescreen && window.PAC_CONFIG.accroche_namescreen.subtitle) || 'Un dossier à traiter'}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, opacity: 0.7, marginBottom: 40 }}>Une recommandation à défendre</div>
 
       <div style={{
         background: 'rgba(255,255,255,0.12)',
@@ -256,93 +256,10 @@ function LoginScreen({ onLogin, studentName }) {
   );
 }
 
-// ─── Bouton vidéo Lumio Health (incipit PAC) ────────────────
-function LumioVideoButton() {
-  const [showVideo, setShowVideo] = useRootState(false);
-  return (
-    <>
-      <div
-        onClick={() => setShowVideo(true)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 14,
-          background: 'rgba(93,226,152,0.10)',
-          border: '1px solid rgba(93,226,152,0.28)',
-          borderRadius: 9, padding: '12px 16px',
-          marginBottom: 16, cursor: 'pointer',
-          transition: 'background .15s'
-        }}
-      >
-        <span style={{ fontSize: 20, flexShrink: 0 }}>▶</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#0B2B2D', lineHeight: 1.3, marginBottom: 2 }}>
-            Découvrez Lumio Health avant de commencer
-          </div>
-          <div style={{ fontSize: 11, color: '#5c5c5c', lineHeight: 1.4 }}>
-            Présentation de l'entreprise, du produit et des enjeux — 6 min
-          </div>
-        </div>
-        <div style={{
-          background: '#5DE298', color: '#0B2B2D',
-          padding: '6px 14px', borderRadius: 6,
-          fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0
-        }}>
-          Regarder →
-        </div>
-      </div>
-      {showVideo && (
-        <div
-          onClick={() => setShowVideo(false)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 99999,
-            background: 'rgba(0,0,0,0.85)',
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            padding: '2rem'
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: 860, position: 'relative' }}
-          >
-            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
-              <iframe
-                src="https://www.youtube.com/embed/LR91Xy4b4G0?rel=0&modestbranding=1&autoplay=1"
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                style={{
-                  position: 'absolute', top: 0, left: 0,
-                  width: '100%', height: '100%',
-                  border: 'none', borderRadius: 8
-                }}
-              />
-            </div>
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <button
-                onClick={() => setShowVideo(false)}
-                style={{
-                  background: 'rgba(255,255,255,0.15)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  borderRadius: 6, padding: '8px 20px',
-                  color: 'white', fontSize: 13, cursor: 'pointer',
-                  fontFamily: 'inherit'
-                }}
-              >
-                Fermer et commencer l'affaire
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
 // ─── Welcome overlay ─────────────────────────────────────────
 function WelcomeBriefCard({ onClose, studentName }) {
   const prenom = studentName.split(' ')[0];
   const [accepted, setAccepted] = useRootState(false);
-  const __acc = (window.PAC_CONFIG && window.PAC_CONFIG.accroche_namescreen) || null;
-
 
   const handleStart = () => {
     if (!accepted) return;
@@ -377,14 +294,8 @@ function WelcomeBriefCard({ onClose, studentName }) {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.15, marginBottom: 14 }}>
           Bienvenue, {prenom}.
         </h1>
-                <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', marginBottom: 10 }}>
-          {__acc && __acc.intro
-            ? __acc.intro.split('{{STUDENT}}').reduce((out, part, i) => {
-                if (i > 0) out.push(<strong key={'s'+i}>{studentName}</strong>);
-                out.push(<React.Fragment key={'t'+i}>{part}</React.Fragment>);
-                return out;
-              }, [])
-            : <span>Tu es <strong>{studentName}</strong>, consultant·e externe. Tu disposes d'un poste de mission dédié pour produire le livrable attendu par le jury.</span>}
+        <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', marginBottom: 10 }}>
+          Tu es <strong>{studentName}</strong>, consultant·e stratégie marcom. Théo Marczak, CEO de Lumio Health, t'a confié une mission urgente : produire la <strong>recommandation stratégique</strong> que l'entreprise défendra vendredi devant son board d'investisseurs. Tu as accès à un poste de mission : email de Théo, email confidentiel de Jakob, deck board Q3, veille concurrentielle, verbatims terrain. <em>Jakob Rein attend une décision, pas une analyse.</em>
         </p>
 
         {/* Bloc temporel — central */}
@@ -392,7 +303,7 @@ function WelcomeBriefCard({ onClose, studentName }) {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>3h30</span>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>=</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{__acc && __acc.ratio_label ? __acc.ratio_label : '3 semaines dans la vraie vie'}</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>18 jours dans l'univers Lumio</span>
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {actes.map(a => (
@@ -417,11 +328,11 @@ function WelcomeBriefCard({ onClose, studentName }) {
         <div style={{ background: '#f7f4ef', borderRadius: 8, padding: '14px 18px', marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Trois règles, pas de négociation</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {(__acc && __acc.regles && __acc.regles.length ? __acc.regles : [
-              { ico: '📄', txt: 'Tout ce que tu sais, c\'est dans les documents du poste de mission.' },
-              { ico: '🤐', txt: 'Le jury teste chaque hypothèse. Il ne cherche pas à t\'aider — il évalue.' },
-              { ico: '💬', txt: 'Quand tu as une hypothèse solide → Slack → ton commanditaire. Sa réaction débloque la suite.' },
-            ]).map((r, i) => (
+            {[
+              { ico: '📄', txt: 'Tout ce que tu sais, c\'est dans les documents.' },
+              { ico: '🤐', txt: 'Jakob ne te dira pas "si c\'est juste". Il teste chaque hypothèse. Il ne cherche pas à t\'aider — il protège son investissement.' },
+              { ico: '💬', txt: 'Quand tu as une hypothèse solide → Slack → Jakob. Sa réaction débloque la suite.' },
+            ].map((r, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>{r.ico}</span>
                 <span style={{ fontSize: 13, color: '#2a2620', lineHeight: 1.55 }}>{r.txt}</span>
@@ -429,9 +340,6 @@ function WelcomeBriefCard({ onClose, studentName }) {
             ))}
           </div>
         </div>
-
-        {/* ── Présentation Lumio Health (vidéo embed) ── */}
-        <LumioVideoButton />
 
         {/* Checkbox engagement + bouton */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, cursor: 'pointer' }} onClick={() => setAccepted(a => !a)}>
@@ -589,17 +497,6 @@ function Root() {
     </>
   );
 }
-
-// Titre d'onglet piloté par la config — jamais codé en dur par bloc.
-(function setDocTitle() {
-  try {
-    const c = window.PAC_CONFIG || {};
-    const ent = c.entreprise || 'Lumio Health';
-    const bloc = (c.bloc || '').toUpperCase();
-    const disp = c.dispositif || 'PAC';
-    document.title = [disp, ent, bloc].filter(Boolean).join(' · ');
-  } catch (e) {}
-})();
 
 // Mount
 ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
