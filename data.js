@@ -657,7 +657,36 @@ window.LUMIO_DATA = {
     "headline": "Wearables anti-stress : les géants américains Whoop et Fitbit Health s'apprêtent à déferler sur l'Europe, les startups françaises sous pression",
     "chapeau": "Whoop et la division santé de Google-Fitbit ont confirmé cette semaine leur entrée simultanée sur le segment européen du bien-être au travail, avec des lancements prévus avant l'été 2025. Pour les acteurs tricolores encore en phase de déploiement, la fenêtre de tir se referme brutalement.",
     "body": "Deux annonces en quarante-huit heures ont suffi à redistribuer les cartes. Whoop, valorisé 3,6 milliards de dollars après sa dernière levée, a dévoilé mardi un partenariat avec le groupe Sodexo Benefits pour équiper 40 000 salariés européens dès juin prochain. Dans la foulée, Fitbit Health — filiale de Google — a présenté à Barcelone son offre 'Workplace Serenity Suite', un écosystème wearable et SaaS ciblant explicitement les directions des ressources humaines des ETI et grands comptes du Vieux Continent. Le prix d'entrée affiché, 189 euros par dispositif avec abonnement data inclus, place la barre très bas. Pour les medtechs françaises dont le modèle repose sur une clientèle B2B fidèle mais encore modeste, l'enjeu n'est plus de croître tranquillement : c'est de s'imposer avant que les standards soient fixés par des acteurs dotés de budgets marketing dix fois supérieurs. Les fonds d'investissement actifs dans le secteur, qui avaient jusqu'ici accordé un délai raisonnable à leurs participations, commencent à demander des preuves de traction digitale mesurables — et vite. Selon nos informations, plusieurs term sheets seraient conditionnés à des indicateurs de lancement e-commerce précis pour le deuxième trimestre 2025."
-  }
+  },
+  "voiceMemos": [
+    {
+      "title": "Benchmark CAC — nos coûts d'acquisition sont hors marché",
+      "author": "Sonia Ferracci",
+      "role": "Directrice Marketing",
+      "date": "3 mars 2025",
+      "context": "mémo dicté après analyse benchmark",
+      "durationSec": 49,
+      "transcript": "J'ai fini de compiler le benchmark coûts d'acquisition sur le segment medtech wearables. Notre CAC estimé pour Lumio Arc en B2C est à 127 euros. Le marché est entre 45 et 80 euros pour des produits comparables. On est complètement hors cible. Le problème, c'est qu'on n'a jamais fait de B2C — notre tunnel de conversion est pensé pour des cycles B2B longs. Si on lance Cortisol Zero avec notre stack marketing actuelle, on va brûler le budget en trois mois sans atteindre le seuil de rentabilité. Il faut repenser le funnel de A à Z."
+    },
+    {
+      "title": "Pipeline DRH — trois prospects chauds mais des conditions",
+      "author": "Camille Ott",
+      "role": "Responsable partenariats B2B",
+      "date": "6 mars 2025",
+      "context": "mémo dicté depuis la voiture",
+      "durationSec": 41,
+      "transcript": "Trois DRH grands comptes sont prêts à commander Lumio Arc pour leurs programmes QVT. Mais ils veulent tous la même chose : un portail e-commerce dédié avec SSO entreprise, facturation centralisée, et un dashboard RH de suivi d'adoption. Pas un site grand public. Si notre stratégie digitale Cortisol Zero ne prévoit pas un canal B2B2C avec ces fonctionnalités, on perd ces trois deals. C'est 4 200 bracelets sur le premier trimestre. À intégrer absolument dans la stratégie canaux."
+    },
+    {
+      "title": "Due diligence Jakob — les six points qui bloquent",
+      "author": "Théo Marczak",
+      "role": "CEO Lumio Health",
+      "date": "8 mars 2025",
+      "context": "mémo dicté après call avec Northgate",
+      "durationSec": 55,
+      "transcript": "Appel avec Jakob ce matin. Il a envoyé une liste de six points bloquants pour la due diligence marketing. En résumé : il veut voir un ROAS prévisionnel par canal, une projection de LTV sur 24 mois, un plan d'accessibilité RGAA pour le site e-commerce, une stratégie SEO avec des KPIs trimestriels, un plan de contenu avec un calendrier éditorial, et une analyse de la concurrence directe sur les canaux digitaux. Il a été clair : sans réponse documentée sur ces six points, Northgate ne validera pas le budget marketing Cortisol Zero. C'est maintenant la priorité absolue."
+    }
+  ]
 };
 
 window.PAC_CONFIG = {
