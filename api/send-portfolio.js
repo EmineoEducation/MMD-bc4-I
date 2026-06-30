@@ -28,6 +28,15 @@ const C = {
 const FONT =
   "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
+// ── Mapping campus → email RP (Sylvain complétera) ──
+const CAMPUS_RP = {
+  'paris':    ['chloe.guyot@cesacom.fr', 'celine.maheo@cesacom.fr'],
+  'nantes':   ['manon.parageaud@cesacom.fr', 'lara.naccache@emineo-education.fr'],
+  'bordeaux': ['anthony.nabli@emineo-education.fr'],
+  'le mans':  ['etienne.azerad@cesacom.fr'],
+  'lemans':   ['etienne.azerad@cesacom.fr'],
+};
+
 function escapeHtml(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;')
@@ -186,6 +195,7 @@ export default async function handler(req, res) {
       contenuHtml,
       studentName,
       html,
+      campus,
     } = body || {};
 
     if (!to) return res.status(400).json({ error: 'Missing required field: to' });
@@ -221,6 +231,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: PORTFOLIO_FROM,
         to: [to],
+        cc: (campus && CAMPUS_RP[(campus || "").toLowerCase()]) ? CAMPUS_RP[campus.toLowerCase()] : [],
         subject: finalSubject,
         html: finalHtml,
         text: finalText,
