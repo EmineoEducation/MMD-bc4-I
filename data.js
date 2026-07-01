@@ -850,3 +850,117 @@ window.PAC_CONFIG = {
 };
 // Alias de compatibilité
 window.PASS_CONFIG = window.PAC_CONFIG;
+
+// === [Audit MMD] ajout D.portraits[] + Finder — 01/07/2026 ===
+// finder.order réservait déjà l'entrée 'portraits' (générateur), jamais alimentée.
+// Structure reprise à l'identique de MMD-bc1 (typo 'portrais/' corrigée au passage).
+(function() {
+  var D = window.LUMIO_DATA;
+  if (!D) return;
+  D.portraits = [
+  {
+    "key": "theo",
+    "id": "portrait-theo",
+    "title": "Théo Marczak — CEO",
+    "tabTitle": "Théo Marczak",
+    "favicon": "T",
+    "faviconColor": "#0a3d62",
+    "host": "lusinedigitale.fr",
+    "url": "lusinedigitale.fr/portrait/theo-marczak",
+    "file": "portraits/portrait_theo_marczak.html"
+  },
+  {
+    "key": "sonia",
+    "id": "portrait-sonia",
+    "title": "Sonia Ferracci — Dir. Marketing",
+    "tabTitle": "Sonia Ferracci",
+    "favicon": "S",
+    "faviconColor": "#a02020",
+    "host": "cbnews.fr",
+    "url": "cbnews.fr/portrait/sonia-ferracci",
+    "file": "portraits/portrait_sonia_ferracci.html"
+  },
+  {
+    "key": "camille",
+    "id": "portrait-camille",
+    "title": "Camille Ott — Partenariats B2B",
+    "tabTitle": "Camille Ott",
+    "favicon": "C",
+    "faviconColor": "#1a6641",
+    "host": "actionco.fr",
+    "url": "actionco.fr/portrait/camille-ott",
+    "file": "portraits/portrait_camille_ott.html"
+  },
+  {
+    "key": "yassine",
+    "id": "portrait-yassine",
+    "title": "Yassine Morel — Content Manager",
+    "tabTitle": "Yassine Morel",
+    "favicon": "Y",
+    "faviconColor": "#e85d3a",
+    "host": "maddyness.com",
+    "url": "maddyness.com/portrait/yassine-morel",
+    "file": "portraits/portrait_yassine_morel.html"
+  },
+  {
+    "key": "jakob",
+    "id": "portrait-jakob",
+    "title": "Jakob Rein — Northgate Capital",
+    "tabTitle": "Jakob Rein",
+    "favicon": "J",
+    "faviconColor": "#1b3a6b",
+    "host": "forbes.fr",
+    "url": "forbes.fr/portrait/jakob-rein",
+    "file": "portraits/portrait_jakob_rein.html"
+  }
+];
+  D.finder = D.finder || { folders: {}, order: [] };
+  D.finder.folders.portraits = {
+  "title": "Portraits équipe",
+  "sidebar": "Portraits",
+  "icon": "🪪",
+  "items": [
+    {
+      "kind": "html",
+      "name": "Théo Marczak — CEO",
+      "app": "browser",
+      "props": {
+        "openPortrait": "theo"
+      }
+    },
+    {
+      "kind": "html",
+      "name": "Sonia Ferracci — Dir. Marketing",
+      "app": "browser",
+      "props": {
+        "openPortrait": "sonia"
+      }
+    },
+    {
+      "kind": "html",
+      "name": "Camille Ott — Partenariats B2B",
+      "app": "browser",
+      "props": {
+        "openPortrait": "camille"
+      }
+    },
+    {
+      "kind": "html",
+      "name": "Yassine Morel — Content Manager",
+      "app": "browser",
+      "props": {
+        "openPortrait": "yassine"
+      }
+    },
+    {
+      "kind": "html",
+      "name": "Jakob Rein — Northgate Capital",
+      "app": "browser",
+      "props": {
+        "openPortrait": "jakob"
+      }
+    }
+  ]
+};
+})();
+// === [Audit MMD] fin ===
