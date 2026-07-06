@@ -36,6 +36,33 @@ function SlackApp({ openChannel }) {
 
   useSlackEffect(() => { if (Object.keys(chatHistory).length === 0) setChatHistory(seed); }, []);
   useSlackEffect(() => { if (openChannel) { setActive(openChannel); setUnreads(u => ({ ...u, [openChannel]: 0 })); } }, [openChannel]);
+
+  // ── Alertes temps (émises par le bureau) → messages du commanditaire dans le fil ──
+  useSlackEffect(() => {
+    const nowT = () => { const t = new Date(); return `${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}`; };
+    const toMsg = (text) => ({ from: ai.name, avatar: ai.avatar, color: ai.color, time: nowT(), text });
+    setChatHistory(h => {
+      const alerts = (window.LUMIO_DATA && window.LUMIO_DATA._timeAlerts || []).map(a => a.text);
+      if (!alerts.length) return h;
+      const cur = h[aiId] || [];
+      const known = {}; cur.forEach(m => { known[m.text] = true; });
+      const add = alerts.filter(t => !known[t]).map(toMsg);
+      return add.length ? { ...h, [aiId]: [...cur, ...add] } : h;
+    });
+    const onAlert = (e) => {
+      const text = (e.detail && e.detail.text) || '';
+      if (!text) return;
+      setChatHistory(h => {
+        const cur = h[aiId] || [];
+        if (cur.some(m => m.text === text)) return h;
+        return { ...h, [aiId]: [...cur, toMsg(text)] };
+      });
+      if (activeIdRef.current !== aiId) setUnreads(u => ({ ...u, [aiId]: (u[aiId] || 0) + 1 }));
+    };
+    window.addEventListener('pac:time-alert', onAlert);
+    return () => window.removeEventListener('pac:time-alert', onAlert);
+  }, []);
+
   useSlackEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [chatHistory, activeId, sending]);
 
   const pushAiReplies = async (raw, startDelay) => {
@@ -93,7 +120,7 @@ function SlackApp({ openChannel }) {
         try {
           const history = (chatHistory[aiId] || []).filter(m => !m.typing).map(m => `${m.isMe ? studentFirst : ai.name.split(' ')[0]}: ${m.text}`).join('\n');
           const userPrompt = `${history}\n${studentFirst}: ${text}\n\nRéponds maintenant en tant que ${ai.name} (2-3 messages courts séparés par ---SPLIT---).`;
-          const resp = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system: prompts.commanditaire || ('Tu es ' + ai.name + '.'), messages: [{ role: 'user', content: userPrompt }] }) });
+          const resp = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system: (prompts.commanditaire || ('Tu es ' + ai.name + '.')) + (window.__pacSessionBrief ? window.__pacSessionBrief() : ''), messages: [{ role: 'user', content: userPrompt }] }) });
           if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.error || `HTTP ${resp.status}`); }
           const data = await resp.json();
           const raw = (data.content || []).map(b => b.text || '').join('') || '';
