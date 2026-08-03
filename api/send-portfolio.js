@@ -1,173 +1,136 @@
-// ============================================================
-//  ÉMINÉO — api/send-portfolio.js
-//  Envoi du portfolio de fin de parcours via Resend
-//  + coche de completion sur le portail (Redis du portail).
-//  ⚠️  bc4-i et mmd-pac.vercel.app sont substitués par le générateur
-//      au moment du ZIP. Ne PAS les remplacer à la main.
-// ============================================================
+// api/send-portfolio.js
+// Envoi du portfolio de compétences par email (Resend)
+// + écriture complétion sur le portail du titre (Redis via portail)
+// Fichier générique — copiable tel quel sur les 18 blocs PAC. Seuls data.js et
+// index.html divergent par bloc (cf. CLAUDE.md).
+// Variables d'environnement Vercel requises :
+//   RESEND_API_KEY               (clé API Resend)
+//   PAC_BLOC_KEY                 ("titre:bloc" en minuscules, ex. "cdrh:bc1" — identifie
+//                                 ce déploiement ; dérive TITRE_CODE/BLOC_ID/PORTAIL_URL
+//                                 et la clé d'incidents Redis)
+//   UPSTASH_REDIS_REST_URL/TOKEN  (journalisation des incidents best-effort)
+//   PORTFOLIO_FROM                (optionnel — ex: "PAC Éminéo <portfolio@emineo-education.fr>")
+//   PAC_FALLBACK_EMAIL            (optionnel — copie de repli si le campus n'est pas résolu ;
+//                                 sert aussi d'adresse de réponse de repli)
+//
+// Adresse de réponse : l'expéditeur est une adresse no-reply technique. Le reply-to est
+// positionné sur le·s référent·s du campus résolu·s par le hub, à défaut sur
+// PAC_FALLBACK_EMAIL. Si ni l'un ni l'autre n'est disponible, aucun reply-to n'est envoyé
+// (les réponses retomberaient sur le no-reply) et l'encart de l'email le dit explicitement.
 
 import { createHash } from 'crypto';
 
-const BLOC_ID     = 'bc4-i';     // ex: 'bc1', 'bc2'... ou 'cdrh-bc1'
-const PORTAL_HOST = 'mmd-pac.vercel.app'; // ex: 'msmc-pac.vercel.app', 'cdrh-pac.vercel.app'
+const PAC_BLOC_KEY = process.env.PAC_BLOC_KEY || 'unknown';
+if (PAC_BLOC_KEY === 'unknown') {
+  console.warn('PAC_BLOC_KEY absente — les incidents seront journalisés dans "unknown:incidents" (probablement jamais consultés). Configurer la variable d\'environnement Vercel avant mise en production.');
+}
+const [TITRE_RAW, BLOC_RAW] = PAC_BLOC_KEY.split(':');
+const TITRE_CODE   = (TITRE_RAW || 'unknown').toUpperCase();
+const BLOC_ID      = BLOC_RAW || 'unknown';
+const PORTAIL_URL  = `https://${TITRE_RAW || 'unknown'}-pac.vercel.app/api/progress`;
 
-const PORTFOLIO_FROM =
-  process.env.PORTFOLIO_FROM ||
-  'Éminéo Education <portfolio@emineo-education.fr>';
+// Numéro RNCP par titre — les 4 entrées sont identiques sur les 18 blocs (le fichier
+// reste copiable tel quel). Pas de mention RNCP dans l'email si TITRE_CODE est inconnu
+// (variable manquante, faute de frappe…) plutôt que d'afficher un numéro faux.
+const RNCP_BY_TITRE = { MSMC: '38504', CDRH: '38438', MMD: '40170', MDO: '35280' };
+const RNCP_CODE = RNCP_BY_TITRE[TITRE_CODE];
 
-// Palette Éminéo
-const C = {
-  abysse: '#0B2B2D',
-  petrole: '#134547',
-  menthe: '#5DE298',
-  givre: '#E3FFF0',
-  gris: '#5A6B6C',
-};
+// Adresse de repli mise en copie quand le campus n'est pas résolu (vide ou absent du
+// registre) — garantit qu'un portfolio n'est jamais produit sans destinataire
+// institutionnel. Optionnelle : si absente, aucune copie n'est ajoutée (comportement
+// précédent), l'incident reste tout de même journalisé.
+const PAC_FALLBACK_EMAIL = process.env.PAC_FALLBACK_EMAIL || '';
 
-// IBM Plex Sans si dispo, repli système partout ailleurs (Outlook inclus)
-const FONT =
-  "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const UPSTASH_URL   = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-// ── Mapping campus → email RP (Sylvain complétera) ──
-const CAMPUS_RP = {
-  'paris':    ['chloe.guyot@cesacom.fr', 'celine.maheo@cesacom.fr'],
-  'nantes':   ['manon.parageaud@cesacom.fr', 'lara.naccache@emineo-education.fr'],
-  'bordeaux': ['anthony.nabli@emineo-education.fr'],
-  'le mans':  ['etienne.azerad@cesacom.fr'],
-  'lemans':   ['etienne.azerad@cesacom.fr'],
-};
-
-function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+// Minuscules, sans accents, espaces internes réduits — les identifiants du registre
+// RP contiennent des espaces ("le mans", "la rochelle") sans forme canonique unique.
+function normalizeCampus(s) {
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .trim().replace(/\s+/g, ' ');
 }
 
-// SHA-256(email lowercased trimmed)[:24] — identique côté portail
+// ── Mapping campus → email RP ──
+// Source de vérité unique : hub emineo-campus-rp (éditable sans redéploiement,
+// via /admin sur ce hub, et résout les exceptions par titre — vérifié : le même
+// campus peut avoir un RP différent selon TITRE_CODE). Aucun repli local : en cas
+// de panne du hub, PAC_FALLBACK_EMAIL prend le relais et l'incident est journalisé.
+const CAMPUS_RP_HUB = 'https://emineo-campus-rp.vercel.app/api/campus-rp';
+
+async function getCampusRPMap() {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 2500);
+    const r = await fetch(CAMPUS_RP_HUB + '?titre=' + TITRE_CODE, { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) throw new Error('hub non-OK: ' + r.status);
+    const data = await r.json();
+    const map = {};
+    for (const c of (data.campuses || [])) {
+      const emails = (c.rp || []).map(p => p.email).filter(Boolean);
+      if (c.id) map[normalizeCampus(c.id)] = emails;
+      if (c.label) map[normalizeCampus(c.label)] = emails;
+    }
+    return { map, hubOk: true };
+  } catch (e) {
+    console.warn('Hub campus-rp injoignable:', e.message);
+    return { map: {}, hubOk: false };
+  }
+}
+
 function hashEmail(email) {
   return createHash('sha256')
-    .update(String(email || '').trim().toLowerCase())
+    .update(email.toLowerCase().trim())
     .digest('hex')
     .slice(0, 24);
 }
 
-/**
- * Coche de completion auprès du portail. À appeler AVANT Resend
- * pour que la progression Redis soit garantie même si l'email échoue.
- * Best-effort : ne lève pas, log seulement.
- * @returns {Promise<boolean>} true si la coche a été acceptée
- */
 async function markCompleted(email) {
-  if (!email || !PORTAL_HOST || PORTAL_HOST.indexOf('__') === 0) {
-    console.warn('markCompleted skipped: missing email or unsubstituted PORTAL_HOST');
-    return false;
-  }
+  if (!email) return false;
   try {
-    const r = await fetch('https://' + PORTAL_HOST + '/api/progress', {
+    const hash = hashEmail(email);
+    const r = await fetch(PORTAIL_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        hash: hashEmail(email),
-        bloc: BLOC_ID,
-        status: 'completed'
-      })
+      body: JSON.stringify({ hash, bloc: BLOC_ID, status: 'completed' }),
     });
-    if (!r.ok) {
-      const t = await r.text().catch(() => '');
-      console.warn('markCompleted non-OK:', r.status, t.slice(0, 200));
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.warn('markCompleted error:', e.message);
+    return r.ok;
+  } catch (err) {
+    // Non bloquant — la complétion est best-effort
+    console.warn('markCompleted error:', err.message);
     return false;
   }
 }
 
-function buildPortfolioHtml(p) {
-  const prenom = escapeHtml(p.prenom);
-  const nom = escapeHtml(p.nom);
-  const formation = escapeHtml(p.formation);
-  const bloc = escapeHtml(p.bloc);
-  const contenuHtml = p.contenuHtml || '';
+// Clé unique pour tout incident best-effort de la chaîne d'envoi (campus non résolu,
+// hub injoignable, carte visuelle non générée, etc.) — un seul endroit à consulter
+// pour réacheminer manuellement a posteriori. Dérivée de PAC_BLOC_KEY pour rester
+// distincte par déploiement même si ce fichier est copié tel quel sur un autre bloc.
+const CAMPUS_INCIDENTS_KEY = `${PAC_BLOC_KEY}:incidents`;
 
-  const preheader =
-    'Portfolio de compétences' +
-    (p.prenom ? ' de ' + escapeHtml(p.prenom) : '') +
-    ' — généré dans le cadre de votre parcours Éminéo.';
-
-  return `<!DOCTYPE html>
-<html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Votre portfolio · Éminéo Education</title>
-  <!--[if mso]><style>table,td{font-family:Arial,sans-serif !important;}</style><![endif]-->
-</head>
-<body style="margin:0;padding:0;background:${C.givre};">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:${C.givre};">${escapeHtml(preheader)}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.givre};">
-    <tr>
-      <td align="center" style="padding:32px 16px;">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;">
-          <tr>
-            <td style="background:${C.abysse};padding:28px 32px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="font-family:${FONT};font-size:20px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">Éminéo<span style="color:${C.menthe};"> Education</span></td>
-                  <td align="right" style="font-family:${FONT};font-size:12px;color:${C.menthe};text-transform:uppercase;letter-spacing:1px;">${bloc || 'Portfolio'}</td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr><td style="height:4px;background:${C.menthe};line-height:4px;font-size:4px;">&nbsp;</td></tr>
-          <tr>
-            <td style="padding:36px 32px 8px 32px;font-family:${FONT};color:${C.abysse};">
-              <h1 style="margin:0 0 18px 0;font-size:22px;font-weight:700;color:${C.abysse};">${prenom ? 'Bonjour ' + prenom + ',' : 'Bonjour,'}</h1>
-              <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:${C.gris};">Voici votre portfolio de compétences${formation ? ', établi dans le cadre de votre parcours <strong style="color:' + C.petrole + ';">' + formation + '</strong>' : ''}. Il rassemble les éléments produits au cours de votre parcours d'activation des compétences.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:8px 32px 28px 32px;font-family:${FONT};color:${C.abysse};font-size:15px;line-height:1.6;">${contenuHtml}</td>
-          </tr>
-          <tr>
-            <td style="padding:0 32px 32px 32px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.givre};border-radius:8px;">
-                <tr>
-                  <td style="padding:16px 20px;font-family:${FONT};font-size:13px;line-height:1.5;color:${C.petrole};"><strong>Message automatique — ne pas répondre.</strong><br>Cet e-mail est envoyé depuis une adresse de notification (<span style="color:${C.gris};">portfolio@emineo-education.fr</span>) qui ne reçoit aucune réponse. Pour toute question, contactez votre référent de formation.</td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="background:${C.petrole};padding:20px 32px;font-family:${FONT};font-size:12px;color:${C.givre};text-align:center;line-height:1.5;">Éminéo Education${nom ? ' · ' + prenom + ' ' + nom : ''}<br><span style="color:${C.menthe};">Parcours d'Activation des Compétences</span></td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-}
-
-function buildPortfolioText(p) {
-  return [
-    p.prenom ? 'Bonjour ' + p.prenom + ',' : 'Bonjour,',
-    '',
-    'Voici votre portfolio de compétences' +
-      (p.formation ? ', établi dans le cadre de votre parcours ' + p.formation : '') +
-      '.',
-    '',
-    '--- Message automatique — ne pas répondre. ---',
-    'Envoyé depuis portfolio@emineo-education.fr (adresse de notification, sans réception).',
-    'Pour toute question, contactez votre référent de formation.',
-    '',
-    'Éminéo Education — Parcours d\'Activation des Compétences',
-  ].join('\n');
+// Journalise un incident best-effort — ne doit jamais bloquer l'envoi.
+async function logIncident(event, fields) {
+  const incident = { event, timestamp: new Date().toISOString(), ...fields };
+  console.warn(event + ':', JSON.stringify(incident));
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
+  try {
+    // Commande envoyée dans le corps (syntaxe REST Upstash ["RPUSH", clé, valeur]),
+    // jamais dans l'URL — email/studentName sont des données personnelles qui ne
+    // doivent pas finir dans les journaux d'accès Vercel/Upstash.
+    await fetch(UPSTASH_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['RPUSH', CAMPUS_INCIDENTS_KEY, JSON.stringify(incident)]),
+    });
+  } catch (err) {
+    console.warn('logIncident redis error:', err.message);
+  }
 }
 
 export default async function handler(req, res) {
@@ -176,85 +139,197 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return res.status(503).json({ error: 'RESEND_API_KEY not configured' });
+  const resendKey = process.env.RESEND_API_KEY;
+  const from      = process.env.PORTFOLIO_FROM || 'PAC Éminéo <onboarding@resend.dev>';
 
   try {
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body);
 
-    const {
-      to,
-      subject,
-      bloc,
-      prenom,
-      nom,
-      formation,
-      contenuHtml,
-      studentName,
-      html,
-      campus,
-    } = body || {};
+    const { email, studentName, portfolioHTML, bloc, date, campus, attachments, cardAttempted } = body || {};
 
-    if (!to) return res.status(400).json({ error: 'Missing required field: to' });
-
-    if (!html && !contenuHtml) {
-      return res.status(400).json({ error: 'Missing portfolio content: provide html or contenuHtml' });
+    if (!email || !portfolioHTML) {
+      return res.status(400).json({ error: 'Champs requis manquants : email, portfolioHTML' });
     }
 
-    // ── 1. Coche de completion AVANT Resend ──
-    // (garantit la progression Redis même si l'email échoue ensuite)
-    const completed = await markCompleted(to);
+    if (!resendKey) {
+      console.error('RESEND_API_KEY non configurée — portfolio non envoyé');
+      return res.status(503).json({ error: 'RESEND_API_KEY non configurée', sent: false });
+    }
 
-    // Prénom : priorité au champ explicite, sinon dérivé de studentName
-    const _prenom = prenom || (studentName ? String(studentName).trim().split(/\s+/)[0] : '');
-    const _nom = nom || (studentName ? String(studentName).trim().split(/\s+/).slice(1).join(' ') : '');
+    // ── Coche de completion AVANT Resend (garantit la progression Redis
+    // même si l'envoi de l'email échoue ensuite — cf. principe markCompleted) ──
+    const completed = await markCompleted(email);
 
-    const finalHtml =
-      html ||
-      buildPortfolioHtml({ prenom: _prenom, nom: _nom, formation, bloc: bloc || BLOC_ID, contenuHtml });
+    const { map: campusRPMap, hubOk } = await getCampusRPMap();
 
-    const finalSubject =
-      subject || ('Votre portfolio' + ((bloc || BLOC_ID) ? ' — ' + (bloc || BLOC_ID) : '') + ' · Éminéo Education');
+    const nomBloc    = bloc || BLOC_ID;
+    const normalizedCampus = normalizeCampus(campus);
+    const resolvedCC = normalizedCampus && campusRPMap[normalizedCampus];
+    const campusResolved = !!(resolvedCC && resolvedCC.length);
+    const cc = campusResolved ? resolvedCC : (PAC_FALLBACK_EMAIL ? [PAC_FALLBACK_EMAIL] : []);
 
-    const finalText = buildPortfolioText({ prenom: _prenom, formation });
+    // Adresse de réponse — même résolution que le cc : l'apprenant qui répond à son
+    // portfolio doit tomber sur son référent campus, jamais sur le no-reply technique.
+    // Resend accepte un tableau ; on ne transmet pas la clé si elle est vide.
+    const replyTo = cc.slice(0, 3);
 
-    // ── 2. Envoi Resend ──
-    const response = await fetch('https://api.resend.com/emails', {
+    if (!hubOk) {
+      // Panne d'infrastructure — touche tous les envois de la fenêtre, pas un campus isolé.
+      await logIncident('hub_unreachable', { email, studentName, bloc: nomBloc, campusReceived: campus || '' });
+    } else if (!campusResolved) {
+      await logIncident('campus_unresolved', { email, studentName, bloc: nomBloc, campusReceived: campus || '' });
+    }
+
+    // ── Pièces jointes (carte visuelle) — base64 uniquement, best-effort. Une pièce
+    // malformée est ignorée plutôt que de faire échouer tout l'envoi.
+    const finalAttachments = Array.isArray(attachments)
+      ? attachments
+          .filter(a => a && a.content && a.filename)
+          .map(a => ({
+            filename: String(a.filename),
+            content: String(a.content),
+            content_id: a.content_id ? String(a.content_id) : undefined,
+          }))
+      : [];
+
+    if (cardAttempted && !finalAttachments.length) {
+      await logIncident('card_render_failed', { email, studentName, bloc: nomBloc, cardAttempted: true });
+    }
+
+    const dateStr    = date || new Date().toLocaleDateString('fr-FR');
+    const prenom     = studentName ? studentName.split(' ')[0] : 'Étudiant(e)';
+    const subject    = `Votre portfolio de compétences PAC — ${nomBloc}`;
+
+    // ── Template email Éminéo ──────────────────────────────────────────────
+    const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:'IBM Plex Sans',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f4;">
+    <tr><td align="center" style="padding:32px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0"
+             style="background:#ffffff;border-radius:8px;overflow:hidden;max-width:600px;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#0B2B2D;padding:28px 32px;">
+            <span style="font-size:22px;font-weight:700;color:#5DE298;letter-spacing:-0.5px;">
+              Éminéo Education
+            </span>
+            <span style="font-size:13px;color:#E3FFF0;margin-left:12px;opacity:0.7;">
+              PAC · Parcours Activation Compétences
+            </span>
+          </td>
+        </tr>
+
+        <!-- Intro -->
+        <tr>
+          <td style="padding:32px 32px 16px;">
+            <p style="margin:0 0 12px;font-size:16px;color:#0B2B2D;">Bonjour ${prenom},</p>
+            <p style="margin:0 0 12px;font-size:15px;color:#134547;line-height:1.6;">
+              Voici votre portfolio de compétences issu du <strong>${nomBloc}</strong>,
+              généré le <strong>${dateStr}</strong>.
+            </p>
+            <p style="margin:0;font-size:14px;color:#555;line-height:1.6;">
+              Ce document retrace votre parcours et l'évaluation IA de vos productions sur
+              les critères du référentiel${RNCP_CODE ? ' RNCP ' + RNCP_CODE : ''}.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Séparateur menthe -->
+        <tr>
+          <td style="padding:0 32px;">
+            <div style="height:3px;background:linear-gradient(90deg,#5DE298,#134547);border-radius:2px;"></div>
+          </td>
+        </tr>
+
+        <!-- Corps portfolio -->
+        <tr>
+          <td style="padding:24px 32px;">
+            ${portfolioHTML}
+          </td>
+        </tr>
+
+        <!-- Encart no-reply -->
+        <tr>
+          <td style="padding:0 32px 24px;">
+            <div style="background:#E3FFF0;border-left:4px solid #5DE298;
+                        padding:12px 16px;border-radius:0 6px 6px 0;">
+              <p style="margin:0;font-size:12px;color:#134547;">
+                ${replyTo.length
+                  ? 'Cet email est envoyé depuis une adresse technique, mais vous pouvez <strong>répondre directement</strong> à ce message : votre réponse arrivera à votre référent Éminéo.'
+                  : '⚠️ Cet email est envoyé depuis une adresse <strong>no-reply</strong>. Pour toute question, contactez directement votre référent Éminéo.'}
+              </p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#0B2B2D;padding:20px 32px;">
+            <p style="margin:0;font-size:12px;color:#E3FFF0;opacity:0.6;text-align:center;">
+              Éminéo Education${RNCP_CODE ? ' · RNCP ' + RNCP_CODE : ''} · PAC ${nomBloc} · ${dateStr}
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+    // ── Envoi Resend ──────────────────────────────────────────────────────
+    const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey,
+        'Authorization': `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: PORTFOLIO_FROM,
-        to: [to],
-        cc: (campus && CAMPUS_RP[(campus || "").toLowerCase()]) ? CAMPUS_RP[campus.toLowerCase()] : [],
-        subject: finalSubject,
-        html: finalHtml,
-        text: finalText,
-        reply_to: [],
+        from,
+        to:       [email],
+        cc,
+        ...(replyTo.length ? { reply_to: replyTo } : {}),
+        subject,
+        html,
+        ...(finalAttachments.length ? { attachments: finalAttachments } : {}),
       }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
+    const resendData = await resendRes.json();
+
+    if (!resendRes.ok) {
       // Resend KO mais la coche Redis est déjà passée → 200 avec warning
-      console.error('Resend API error:', data);
+      console.error('Resend error:', resendData);
       return res.status(200).json({
         sent: false,
         completed,
+        campusResolved,
         warning: 'Email failed but progress saved on portal',
-        resendError: data
+        resendError: resendData,
       });
     }
-    return res.status(200).json({ sent: true, completed, id: data.id });
+
+    return res.status(200).json({ sent: true, completed, campusResolved, id: resendData.id });
+
   } catch (err) {
-    console.error('send-portfolio error:', err);
-    return res.status(500).json({ error: 'send error', message: err.message });
+    console.error('send-portfolio handler error:', err);
+    return res.status(500).json({ error: 'Erreur serveur', message: err.message, sent: false });
   }
 }
 
+// La carte visuelle est transmise en base64 dans le corps de la requête. 4 Mo est la
+// valeur maximale utile : Vercel refuse au niveau plateforme (413) tout corps de requête
+// dépassant ~4,5 Mo, quelle que soit la valeur déclarée ici. Ne pas monter à 10 Mo en
+// croyant élargir quoi que ce soit — la seule marge de manœuvre est côté client
+// (compression/qualité des images dans app-livrable.jsx). Mesure actuelle : ~412 Ko.
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
