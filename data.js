@@ -964,3 +964,19 @@ window.PASS_CONFIG = window.PAC_CONFIG;
 };
 })();
 // === [Audit MMD] fin ===
+
+// === [Carte portfolio] — 05/08/2026 · contenu propre au bloc, ajout non destructif ===
+(function () {
+  var c = window.PAC_CONFIG || window.PASS_CONFIG;
+  if (!c) return;
+  c.portfolio = {
+    missionTitre: "Lancer une offre grand public sur les canaux digitaux",
+    miseEnSituation: "Le lancement digital du bracelet doit générer des ventes directes sans cannibaliser la distribution existante, dans un cadre où la collecte de données utilisateurs est encadrée par le RGPD et où les contenus produits doivent rester accessibles aux publics en situation de handicap.",
+    choix: "Une stratégie digitale articulée au plan de distribution plutôt qu'autonome : acquisition mesurée au ROAS canal par canal, contenus conçus accessibles dès la production, et collecte de données limitée à ce que la finalité déclarée justifie.",
+    justification: "Un plan digital pensé indépendamment des canaux physiques déplace le chiffre d'affaires au lieu de le créer ; adosser chaque canal à un seuil de rentabilité mesuré permet d'arbitrer en cours de campagne plutôt qu'au bilan.",
+    imageSrc: ""
+  };
+  window.PAC_CONFIG = c;
+  window.PASS_CONFIG = c;
+})();
+// === [Carte portfolio] fin ===
