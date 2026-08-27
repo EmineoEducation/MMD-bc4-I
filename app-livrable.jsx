@@ -4,7 +4,7 @@
 //  Lit tout depuis window.PAC_CONFIG. Aucun prompt hardcodé.
 // ══════════════════════════════════════════════════════════════
 
-const { useState: useLivState } = React;
+const { useState: useLivState, useEffect: useLivEffect } = React;
 const _wc = (t) => (t || "").trim() ? (t || "").trim().split(/\s+/).length : 0;
 
 // ── Markdown-lite : rendu sécurisé (échappement HTML systématique) ──
@@ -99,7 +99,7 @@ function LivField({ title, count, min, placeholder, conseil, value, onChange, lo
     <div style={{ background: "white", borderRadius: 10, padding: "16px 18px", marginBottom: 14, border: "1px solid var(--rule)", opacity: locked ? 0.7 : 1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
         <span style={{ fontWeight: 700, fontSize: 14 }}>{title}</span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: count >= min ? "#1a6641" : "var(--ink-faint)" }}>{count}/{min} mots</span>
+        <span title="Volume repère — indicatif, il ne bloque pas la remise" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: count >= min ? "#1a6641" : "var(--ink-faint)" }}>{count}/{min} mots<span style={{ opacity: 0.6 }}> repère</span></span>
       </div>
       {placeholder ? <div style={{ fontSize: 12, color: "var(--ink-mute)", marginBottom: 8, lineHeight: 1.5 }}>{placeholder}</div> : null}
       {!locked ? (
@@ -130,6 +130,39 @@ function LivField({ title, count, min, placeholder, conseil, value, onChange, lo
 }
 
 
+// ── F33 · Indicateur de sauvegarde ────────────────────────────
+function SaveStatus() {
+  const P = window.PAC_PERSIST;
+  const [st, setSt] = useLivState(P ? P.status() : null);
+  useLivEffect(() => {
+    if (!P || !P.onChange) return;
+    return P.onChange(s => setSt({ ...s }));
+  }, []);
+
+  if (!P) return null;
+
+  if (st && st.ok === false) {
+    return (
+      <div style={{ background: "#fdecea", border: "1px solid #c4420f", borderRadius: 7, padding: "10px 14px", marginBottom: 16, fontSize: 12.5, color: "#7a2408", lineHeight: 1.55 }}>
+        <strong>⚠ Sauvegarde automatique interrompue.</strong> Votre copie n'est plus enregistrée sur le serveur.
+        Copiez dès maintenant votre texte dans le Bloc-notes, puis prévenez votre référent de campus.
+        Ne rechargez pas cette page.
+      </div>
+    );
+  }
+
+  const heure = st && st.lastSaved
+    ? new Date(st.lastSaved).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    : null;
+
+  return (
+    <div style={{ fontSize: 11, color: "var(--ink-faint)", marginBottom: 16, fontFamily: "var(--font-mono)" }}>
+      {heure ? "✓ Copie enregistrée automatiquement · dernière sauvegarde " + heure
+             : "✓ Copie enregistrée automatiquement au fil de la saisie"}
+    </div>
+  );
+}
+
 function LivrableApp() {
   const cfg = window.PAC_CONFIG || window.PASS_CONFIG || {};
   const comps = cfg.competences || [];
@@ -140,13 +173,103 @@ function LivrableApp() {
   const [feedback, setFeedback] = useLivState("");     // retour formatif
   const [debrief, setDebrief] = useLivState("");       // débrief final
   const [err, setErr] = useLivState("");
+  // F42 · Demande de confirmation lorsque la copie est sous le volume repère.
+  const [confirmCourt, setConfirmCourt] = useLivState(false);
   const [sent, setSent] = useLivState("");
+
+  // ══ F33 · Persistance de la copie ═══════════════════════════
+  // La saisie du livrable ne survivait à aucun rechargement : plusieurs
+  // heures de travail disparaissaient à la moindre touche F5. On restaure
+  // la copie ET l'étape du flux (un retour formatif déjà reçu n'est pas
+  // reperdu), puis on sauvegarde en différé à chaque frappe.
+  // `hydrated` interdit toute écriture tant que la lecture n'a pas eu
+  // lieu — sinon l'état vide du montage écraserait la copie enregistrée.
+  const [hydrated, setHydrated] = useLivState(false);
+
+  useLivEffect(() => {
+    let annule = false;
+    const P = window.PAC_PERSIST;
+    if (!P) { setHydrated(true); return; }
+    P.load().then(session => {
+      if (annule) return;
+      const L = (session && session.livrable) || null;
+      if (L) {
+        if (L.answers && typeof L.answers === 'object') setAnswers(L.answers);
+        if (typeof L.reflexive === 'string') setReflexive(L.reflexive);
+        if (typeof L.feedback === 'string') setFeedback(L.feedback);
+        if (typeof L.debrief === 'string') setDebrief(L.debrief);
+        // On ne restaure jamais vers une étape terminale par erreur :
+        // seules les étapes réellement atteintes sont reprises.
+        if (L.step === 'feedback' || L.step === 'revision' || L.step === 'debrief') setStep(L.step);
+      }
+      setHydrated(true);
+    });
+    return () => { annule = true; };
+  }, []);
+
+  const snapshotLivrable = () => ({
+    answers, reflexive, step, feedback, debrief, savedAt: Date.now()
+  });
+
+  useLivEffect(() => {
+    if (!hydrated || !window.PAC_PERSIST) return;
+    window.PAC_PERSIST.save('livrable', snapshotLivrable());
+  }, [hydrated, answers, reflexive, step, feedback, debrief]);
+
+  // Filet : écriture immédiate si l'onglet se ferme en pleine rédaction.
+  useLivEffect(() => {
+    if (!window.PAC_PERSIST) return;
+    const bye = () => { if (hydrated) window.PAC_PERSIST.flush('livrable', snapshotLivrable()); };
+    window.addEventListener('beforeunload', bye);
+    return () => window.removeEventListener('beforeunload', bye);
+  }, [hydrated, answers, reflexive, step, feedback, debrief]);
+  // ══ fin F33 ═════════════════════════════════════════════════
 
   const set = (code, v) => setAnswers(a => ({ ...a, [code]: v }));
   const totalMots = comps.reduce((n, c) => n + _wcMd(answers[c.code]), 0) + _wcMd(reflexive);
   const allMin = comps.every(c => _wcMd(answers[c.code]) >= (c.min || 0));
   const reflexiveOk = !cfg.note_reflexive || _wcMd(reflexive) >= (cfg.noteReflexiveMinMots || 0);
-  const canSubmit = allMin && reflexiveOk && totalMots >= (cfg.livrableMinMots || 0) && !sending;
+
+  // ══ F42 · Le volume ne verrouille plus la remise ═════════════
+  // Constat de terrain (Vi, CESACOM Lille, 27/08) : une copie qui
+  // identifiait la contradiction 230/180 — celle qui valide justement la
+  // compétence visée — est restée non soumise, donc non évaluée, pour un
+  // déficit de mots. Le format demandé aggrave le phénomène : une
+  // plateforme de marque ou un plan média se rédigent en listes denses,
+  // et plus la réponse est professionnelle, moins elle pèse de mots.
+  // Un compteur ne peut pas être le portier d'une épreuve certifiante :
+  // le jury évalue sur les critères RNCP et sait sanctionner une réponse
+  // sous-développée. Le minimum devient donc un seuil RECOMMANDÉ,
+  // signalé et confirmé, mais non bloquant.
+  //
+  // Seul subsiste un plancher anti-copie-vide, pour éviter de lancer une
+  // évaluation sur des champs vides ou remplis au hasard.
+  const PLANCHER_MOTS = 15;
+  const plancherAtteint =
+    comps.every(c => _wcMd(answers[c.code]) >= PLANCHER_MOTS) &&
+    (!cfg.note_reflexive || _wcMd(reflexive) >= PLANCHER_MOTS);
+  const videsOuTropCourts = comps
+    .filter(c => _wcMd(answers[c.code]) < PLANCHER_MOTS)
+    .map(c => c.code);
+
+  const volumeAtteint = allMin && reflexiveOk && totalMots >= (cfg.livrableMinMots || 0);
+  const canSubmit = plancherAtteint && !sending;
+  // ══ fin F42 ═════════════════════════════════════════════════
+
+  // ══ F38 · Bouton grisé sans explication ══════════════════════
+  // Le bouton de soumission se débloque uniquement quand CHAQUE
+  // compétence atteint son minimum de mots. Jusqu'ici, rien ne le disait :
+  // l'étudiant·e voyait un bouton gris, muet, et concluait à une panne.
+  // Il manquait parfois dix mots sur une seule rubrique. On liste
+  // désormais précisément ce qui reste à écrire.
+  const manquants = comps
+    .filter(c => _wcMd(answers[c.code]) < (c.min || 0))
+    .map(c => ({ code: c.code, manque: (c.min || 0) - _wcMd(answers[c.code]) }));
+  const manqueReflexive = (cfg.note_reflexive && _wcMd(reflexive) < (cfg.noteReflexiveMinMots || 0))
+    ? (cfg.noteReflexiveMinMots || 0) - _wcMd(reflexive)
+    : 0;
+  const manqueTotal = Math.max(0, (cfg.livrableMinMots || 0) - totalMots);
+  // ══ fin F38 ═════════════════════════════════════════════════
 
   // ── Construire le texte de production ──
   const buildProd = () => {
@@ -299,6 +422,13 @@ function LivrableApp() {
           {cfg.deadline ? "Échéance : " + cfg.deadline : null}
         </div>
 
+        {/* ── F33 · État de la sauvegarde automatique ──
+            Muet tant que tout va bien (une simple mention discrète).
+            Devient un avertissement franc dès qu'une écriture échoue :
+            l'étudiant doit apprendre TOUT DE SUITE que sa copie n'est
+            plus protégée, pas au moment de la perdre. ── */}
+        <SaveStatus />
+
         {/* ── Champs par compétence (saisie markdown-lite : toolbar + aperçu) ── */}
         {comps.map(c => (
           <LivField key={c.code}
@@ -320,9 +450,63 @@ function LivrableApp() {
 
         {err ? <div style={{ color: "#c4420f", fontSize: 12, marginBottom: 10 }}>{err}</div> : null}
 
+        {/* ── F42 · Champs sous le plancher : seul cas réellement bloquant ── */}
+        {(step === "draft" || step === "revision") && !plancherAtteint && !sending ? (
+          <div style={{ background: "#fdecea", border: "1px solid #c4420f", borderRadius: 7, padding: "11px 14px", marginBottom: 12, fontSize: 12.5, color: "#7a2408", lineHeight: 1.6 }}>
+            <strong>Une réponse par compétence est nécessaire avant de soumettre.</strong>
+            <div style={{ marginTop: 6 }}>
+              À renseigner : {videsOuTropCourts.join(", ")}
+              {cfg.note_reflexive && _wcMd(reflexive) < PLANCHER_MOTS ? (videsOuTropCourts.length ? ", " : "") + "note réflexive" : ""}
+            </div>
+          </div>
+        ) : null}
+
+        {/* ── F38 + F42 · Volume recommandé — informatif, non bloquant ── */}
+        {(step === "draft" || step === "revision") && plancherAtteint && !volumeAtteint && !sending ? (
+          <div style={{ background: "#fff8e6", border: "1px solid #d9a300", borderRadius: 7, padding: "11px 14px", marginBottom: 12, fontSize: 12.5, color: "#6b4e00", lineHeight: 1.6 }}>
+            <strong>Volume recommandé non atteint — vous pouvez soumettre malgré tout.</strong> Le jury évalue le fond ;
+            une réponse trop brève est simplement plus difficile à valoriser.
+            {manquants.length ? (
+              <div style={{ marginTop: 6 }}>
+                {manquants.map(m => (
+                  <div key={m.code}>{m.code} — {m.manque} mot{m.manque > 1 ? "s" : ""} sous le repère</div>
+                ))}
+              </div>
+            ) : null}
+            {manqueReflexive ? <div style={{ marginTop: 6 }}>Note réflexive — {manqueReflexive} mot{manqueReflexive > 1 ? "s" : ""} sous le repère</div> : null}
+            {manqueTotal ? <div style={{ marginTop: 6 }}>Total du livrable — {manqueTotal} mot{manqueTotal > 1 ? "s" : ""} sous le repère</div> : null}
+          </div>
+        ) : null}
+
+        {/* ── F42 · Confirmation avant une remise sous le volume recommandé ── */}
+        {(step === "draft" || step === "revision") && confirmCourt && !sending ? (
+          <div style={{ background: "var(--paper, #fff)", border: "1px solid #134547", borderRadius: 7, padding: "13px 16px", marginBottom: 12, fontSize: 13, lineHeight: 1.6 }}>
+            <strong>Soumettre malgré un volume inférieur au repère ?</strong>
+            <div style={{ marginTop: 6, color: "var(--ink-soft, #555)" }}>
+              Vos réponses partent telles quelles à l'évaluation. Vous pourrez les reprendre après le retour formatif.
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+              <button onClick={() => setConfirmCourt(false)}
+                style={{ background: "transparent", color: "#134547", border: "1px solid #134547", borderRadius: 7, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                Compléter d'abord
+              </button>
+              <button onClick={() => { setConfirmCourt(false); (step === "draft" ? submitForFeedback : submitFinal)(); }}
+                style={{ background: "#134547", color: "white", border: "none", borderRadius: 7, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                Soumettre quand même
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {/* ── Bouton étape 1 : soumettre pour évaluation ── */}
-        {(step === "draft" || step === "revision") ? (
-          <button onClick={canSubmit ? (step === "draft" ? submitForFeedback : submitFinal) : undefined} disabled={!canSubmit}
+        {(step === "draft" || step === "revision") && !confirmCourt ? (
+          <button
+            onClick={canSubmit
+              ? (volumeAtteint
+                  ? (step === "draft" ? submitForFeedback : submitFinal)
+                  : () => setConfirmCourt(true))
+              : undefined}
+            disabled={!canSubmit}
             style={{ background: canSubmit ? "#134547" : "rgba(20,24,36,0.1)", color: canSubmit ? "white" : "var(--ink-faint)", border: "none", borderRadius: 7, padding: "11px 24px", fontSize: 13, fontWeight: 600, cursor: canSubmit ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
             {sending ? "Évaluation en cours…" : step === "draft" ? "Soumettre pour évaluation →" : "Valider le livrable final →"}
           </button>
