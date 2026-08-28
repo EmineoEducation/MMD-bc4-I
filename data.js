@@ -691,6 +691,7 @@ window.LUMIO_DATA = {
 
 window.PAC_CONFIG = {
   "bloc": "bc4-i",
+  "titreCode": "MMD",
   accroche_namescreen: {
     "subtitle": "Stratégie marketing digital & e-commerce",
     "role": "consultant·e marketing digital",
