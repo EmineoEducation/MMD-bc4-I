@@ -5,6 +5,120 @@
 // ══════════════════════════════════════════════════════════════
 const { useState: useSlackState, useEffect: useSlackEffect, useRef: useSlackRef } = React;
 
+// ══════════════════════════════════════════════════════════════
+if (!window.PAC_FETCH) {
+  window.PAC_FETCH = async function (url, options, essais) {
+    const max = essais == null ? 3 : essais;
+    let derniere = null;
+    for (let i = 0; i < max; i++) {
+      try {
+        return await fetch(url, options);
+      } catch (e) {
+        derniere = e;
+        console.warn('PAC_FETCH — tentative ' + (i + 1) + '/' + max + ' échouée', e);
+        if (i < max - 1) await new Promise(r => setTimeout(r, 800 * (i + 1)));
+      }
+    }
+    throw derniere;
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+if (!window.PAC_PERSIST) {
+  window.PAC_PERSIST = (function () {
+    var timers = {};
+    var pending = null;
+    var state = { ok: null, lastSaved: null, lastError: null };
+    var listeners = [];
+
+    var sid = function () {
+      try { return localStorage.getItem('lumio_sid') || null; } catch (e) { return null; }
+    };
+    var notify = function () { listeners.forEach(function (f) { try { f(state); } catch (e) {} }); };
+
+    // Appel réseau direct plutôt que window.LUMIO_SESSION : le helper de
+    // main.jsx avale les erreurs dans un console.warn et renvoie null quoi
+    // qu'il arrive. Or un échec de sauvegarde silencieux est exactement le
+    // scénario qui coûte des heures de travail — il doit être visible.
+    var write = function (slot, value) {
+      var id = sid();
+      if (!id) return Promise.resolve(false);
+      var payload = {}; payload[slot] = value;
+      return window.PAC_FETCH('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, session: payload })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        state.ok = true; state.lastSaved = Date.now(); state.lastError = null;
+        notify(); return true;
+      }).catch(function (e) {
+        state.ok = false; state.lastError = String(e && e.message || e);
+        console.warn('PAC_PERSIST — échec de sauvegarde (' + slot + ') :', e);
+        notify(); return false;
+      });
+    };
+
+    return {
+      sid: sid,
+      status: function () { return state; },
+      onChange: function (f) {
+        listeners.push(f);
+        return function () { listeners = listeners.filter(function (x) { return x !== f; }); };
+      },
+      // Écriture différée : une seule requête après 1,2 s sans frappe.
+      save: function (slot, value, delay) {
+        if (!sid()) return;
+        clearTimeout(timers[slot]);
+        timers[slot] = setTimeout(function () { write(slot, value); }, delay == null ? 1200 : delay);
+      },
+      // Écriture immédiate : fermeture d'onglet, remise du livrable.
+      flush: function (slot, value) {
+        clearTimeout(timers[slot]);
+        return write(slot, value);
+      },
+      // Lecture : un seul GET partagé par toutes les apps au montage.
+      load: function () {
+        var id = sid();
+        if (!id) return Promise.resolve(null);
+        if (!pending) {
+          pending = window.PAC_FETCH('/api/session?id=' + encodeURIComponent(id))
+            .then(function (r) { return r.status === 404 ? null : r.json(); })
+            .then(function (j) { return (j && j.session) || null; })
+            .catch(function () { return null; });
+        }
+        return pending;
+      }
+    };
+  })();
+}
+
+// ══════════════════════════════════════════════════════════════
+const buildLivrableFactsBlock = () => {
+  const cfg = window.PAC_CONFIG || window.PASS_CONFIG || {};
+  const comps = cfg.competences || [];
+  const lignes = comps.length
+    ? comps.map(c => `- ${c.code} : ${c.label}${c.min ? ' (' + c.min + ' mots minimum)' : ''}`).join('\n')
+    : '- (structure non fournie : ne décris alors JAMAIS le contenu du livrable)';
+  return `
+
+═══ LE LIVRABLE — FAITS, RÈGLE ABSOLUE ═══
+
+Le livrable attendu se remplit dans l'application « Livrable » du poste de la personne. Il est composé des rubriques suivantes :
+
+${lignes}
+
+Les nombres de mots indiqués sont des REPÈRES, pas des conditions : depuis F42, une copie plus courte peut être soumise après confirmation. Le bouton n'est grisé que si une rubrique est vide ou quasi vide (moins de quinze mots). Un bouton grisé ne signale jamais une panne.
+
+Règles non négociables :
+1. Tu ne décris JAMAIS le livrable autrement que par les rubriques ci-dessus. Tu n'inventes ni format, ni nombre de paragraphes, ni nombre de sources.
+2. Tu ne dis JAMAIS avoir validé, relu ou finalisé quoi que ce soit « ensemble ». Tu n'as rien reçu tant que le livrable n'a pas été soumis.
+3. Tu ne proposes JAMAIS un autre canal de remise : ni mail, ni copier-coller, ni pièce jointe, ni message. La remise se fait uniquement par l'application Livrable. Aucune autre voie ne sera évaluée.
+4. Si on te signale un problème technique (bouton grisé, page qui ne répond pas, message d'erreur), tu réponds en une phrase que ce n'est pas de ton ressort et qu'il faut voir avec le référent de campus, puis tu reviens au fond. Tu ne proposes aucun contournement.
+5. Si on te demande de confirmer qu'un travail est « bon » alors qu'il ne t'a pas été soumis, tu dis que tu ne l'as pas encore reçu.`;
+};
+
+
 function SlackApp({ openChannel }) {
   const D = window.LUMIO_DATA || {};
   const cfg = window.PAC_CONFIG || {};
@@ -34,7 +148,39 @@ function SlackApp({ openChannel }) {
   const studentName = (D.student && D.student.name) || 'Étudiant·e';
   const studentFirst = studentName.split(' ')[0];
 
-  useSlackEffect(() => { if (Object.keys(chatHistory).length === 0) setChatHistory(seed); }, []);
+  // ══ F33 · Restauration de la conversation ═══════════════════
+  const [hydrated, setHydrated] = useSlackState(false);
+
+  useSlackEffect(() => {
+    let annule = false;
+    window.PAC_PERSIST.load().then(session => {
+      if (annule) return;
+      const sv = (session && session.slack) || null;
+      if (sv && sv.history && Object.keys(sv.history).length) {
+        setChatHistory(sv.history);
+        if (sv.unreads) setUnreads(sv.unreads);
+        const n = sv.exchangeCount || 0;
+        setExchangeCountLocal(n);
+        if (n > 0 && window.__onSlackExchange) { try { window.__onSlackExchange(n); } catch (e) {} }
+      } else {
+        setChatHistory(seed);
+      }
+      setHydrated(true);
+    });
+    return () => { annule = true; };
+  }, []);
+
+  useSlackEffect(() => {
+    if (!hydrated) return;
+    window.PAC_PERSIST.save('slack', { history: chatHistory, unreads, exchangeCount, savedAt: Date.now() });
+  }, [hydrated, chatHistory, unreads, exchangeCount]);
+
+  useSlackEffect(() => {
+    const bye = () => { if (hydrated) window.PAC_PERSIST.flush('slack', { history: chatHistory, unreads, exchangeCount, savedAt: Date.now() }); };
+    window.addEventListener('beforeunload', bye);
+    return () => window.removeEventListener('beforeunload', bye);
+  }, [hydrated, chatHistory, unreads, exchangeCount]);
+  // ══ fin F33 ═════════════════════════════════════════════════
   useSlackEffect(() => { if (openChannel) { setActive(openChannel); setUnreads(u => ({ ...u, [openChannel]: 0 })); } }, [openChannel]);
 
   // ── Alertes temps (émises par le bureau) → messages du commanditaire dans le fil ──
@@ -86,7 +232,7 @@ function SlackApp({ openChannel }) {
       const resume = Object.entries(sections || {}).map(([code, text]) => `${code} : ${(text || '').substring(0, 300)}`).join('\n\n');
       const prompt = `${prompts.commanditaireLivrable || 'Tu réagis à la production soumise en 2-3 messages courts séparés par ---SPLIT---.'}\n\nProduction reçue :\n${resume}`;
       try {
-        const resp = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }) });
+        const resp = await window.PAC_FETCH('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }) });
         const data = await resp.json();
         const raw = (data.content || []).map(b => b.text || '').join('') || '';
         await pushAiReplies(raw, 600);
@@ -118,9 +264,9 @@ function SlackApp({ openChannel }) {
       setSending(true);
       setTimeout(async () => {
         try {
-          const history = (chatHistory[aiId] || []).filter(m => !m.typing).map(m => `${m.isMe ? studentFirst : ai.name.split(' ')[0]}: ${m.text}`).join('\n');
+          const history = (chatHistory[aiId] || []).filter(m => !m.typing).slice(-16).map(m => `${m.isMe ? studentFirst : ai.name.split(' ')[0]}: ${m.text}`).join('\n');
           const userPrompt = `${history}\n${studentFirst}: ${text}\n\nRéponds maintenant en tant que ${ai.name} (2-3 messages courts séparés par ---SPLIT---).`;
-          const resp = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system: (prompts.commanditaire || ('Tu es ' + ai.name + '.')) + (window.__pacSessionBrief ? window.__pacSessionBrief() : ''), messages: [{ role: 'user', content: userPrompt }] }) });
+          const resp = await window.PAC_FETCH('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system: (prompts.commanditaire || ('Tu es ' + ai.name + '.')) + buildLivrableFactsBlock() + (window.__pacSessionBrief ? window.__pacSessionBrief() : ''), messages: [{ role: 'user', content: userPrompt }] }) });
           if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.error || `HTTP ${resp.status}`); }
           const data = await resp.json();
           const raw = (data.content || []).map(b => b.text || '').join('') || '';

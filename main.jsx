@@ -525,6 +525,18 @@ function Root() {
         phase: 'brief',
         fromPortal: true
       });
+      // F34 · Sans cette ligne, l'URL du portail (?p=&n=&e=&c=) reste
+      // affichée après le montage. Un rechargement (Cmd+R, F5) relit alors
+      // les MÊMES paramètres et retombe systématiquement dans CETTE
+      // branche : une session neuve est créée (sid basé sur Date.now()),
+      // qui écrase la référence en localStorage. La restauration de
+      // session (branche 2 ci-dessous, et donc F33) n'est alors JAMAIS
+      // tentée — quel que soit son bon fonctionnement par ailleurs. C'est
+      // le scénario le plus fréquent : un·e étudiant·e arrive par le
+      // portail, donc CE lien est celui que quasiment tout le monde
+      // recharge. On nettoie l'URL visible pour qu'un reload retombe sur
+      // la branche 2 (restauration) plutôt que de repartir de zéro.
+      try { window.history.replaceState({}, '', window.location.pathname); } catch (e) {}
       // Direct au brief (sans NameScreen ni lockscreen)
       setPhase('brief');
       return;

@@ -8,11 +8,42 @@
 
 const { useState: useJefState } = React;
 
+// ══════════════════════════════════════════════════════════════
+// F39 · RÉSEAU INSTABLE
+// Les étudiants travaillent sur leurs propres machines, en partage de
+// connexion mobile. Sur un réseau qui tombe une seconde, `fetch` échoue
+// franchement : la requête n'atteint jamais le serveur, elle n'apparaît
+// donc dans aucun journal côté Vercel, et le personnage se taisait — ce
+// qui, du poste de l'encadrant sur une connexion stable, était
+// impossible à reproduire.
+// Correctif : trois tentatives espacées avant d'abandonner. Une coupure
+// d'une ou deux secondes devient invisible pour l'étudiant·e.
+// Bloc générique et idempotent.
+// ══════════════════════════════════════════════════════════════
+if (!window.PAC_FETCH) {
+  window.PAC_FETCH = async function (url, options, essais) {
+    const max = essais == null ? 3 : essais;
+    let derniere = null;
+    for (let i = 0; i < max; i++) {
+      try {
+        return await fetch(url, options);
+      } catch (e) {
+        derniere = e;
+        console.warn('PAC_FETCH — tentative ' + (i + 1) + '/' + max + ' échouée', e);
+        if (i < max - 1) await new Promise(r => setTimeout(r, 800 * (i + 1)));
+      }
+    }
+    throw derniere;
+  };
+}
+
+
 // Conseils génériques par numéro d'acte — les durées viennent de cfg.temps
 const JEF_ACTES = {
   1: { obj: "Observer, lire le brief.", action: (cmd) => "Ouvrir Mail. Lire le brief de " + cmd + "." },
   2: { obj: "Lire tous les documents du dossier.", action: () => "PDF, Mail, Navigateur, Mémos vocaux, Finder." },
-  3: { obj: "Tester une hypothèse.", action: (cmd) => "Slack → " + cmd + ". Sa réaction débloque le Livrable." },
+  // F37 · « Sa réaction débloque le Livrable » : condition inexistante.
+  3: { obj: "Tester une hypothèse.", action: (cmd) => "Slack → " + cmd + ". Le Livrable est déjà ouvert : commencer à rédiger en parallèle." },
   4: { obj: "Rédiger le livrable.", action: () => "Ouvrir le Livrable. Traiter chaque compétence dans l'ordre." },
   5: { obj: "Relire puis soumettre.", action: () => "Soumettre au jury." }
 };
@@ -30,9 +61,14 @@ function jefSnapshot() {
   const opened = D._openedApps || [];
   const exch = D._slackExchanges || 0;
   const unlockAt = EV.unlockLivrableAfter != null ? EV.unlockLivrableAfter : 1;
+  // F37 · Jefferson annonçait le livrable « pas encore débloqué, il faut
+  // d'abord envoyer une hypothèse sur Slack ». C'était FAUX : le livrable
+  // est ouvert dès la première minute, le compteur d'échanges ne pilote
+  // qu'une pastille visuelle. Des promotions entières attendaient une
+  // autorisation qui n'existe pas.
   const livrable = D._livrableSubmitted
     ? "soumis — débrief final reçu"
-    : (exch >= unlockAt ? "débloqué, en cours de rédaction" : "pas encore débloqué (il faut d'abord envoyer une hypothèse sur Slack à " + cmd + ")");
+    : (exch > 0 ? "ouvert, rédaction commencée ou en cours" : "ouvert et accessible dès maintenant (aucune condition à remplir)");
   const fictif = window.__getFictifTime ? window.__getFictifTime().label : "";
   const g = JEF_ACTES[acte.n] || JEF_ACTES[1];
   return { cfg, cmd, elapsed, left, TOTAL, acte, opened, exch, livrable, fictif, obj: g.obj, action: g.action(cmd) };
@@ -50,7 +86,9 @@ function buildJeffersonPrompt(name) {
     "- Échanges Slack avec " + s.cmd + " : " + s.exch + "\n" +
     "- Livrable : " + s.livrable + "\n\n" +
     "RÈGLES :\n" +
-    "- Ne conseille jamais une action déjà faite (application déjà ouverte, échange Slack déjà réalisé, livrable déjà débloqué).\n" +
+    "- Ne conseille jamais une action déjà faite (application déjà ouverte, échange Slack déjà réalisé).\n" +
+    "- Le Livrable est TOUJOURS accessible, dès la première minute. Ne dis JAMAIS qu'il est verrouillé, bloqué, ou qu'il faut remplir une condition pour y accéder. Si la personne attend une autorisation, dis-lui clairement qu'elle peut ouvrir le Livrable et commencer à rédiger tout de suite.\n" +
+    "- Ne demande jamais d'attendre la réponse de quelqu'un pour avancer : on peut toujours lire un document ou rédiger une section en attendant.\n" +
     "- Ne répète jamais un conseil déjà donné dans l'historique de cette conversation : reformule ou passe à l'étape suivante.\n" +
     "- Si l'étudiant·e est en retard sur la phase (ex. Acte 4 mais livrable pas débloqué), dis-le clairement et donne la priorité.\n" +
     "- Réponds en 2 phrases maximum, concret, sans donner la réponse au livrable.\n" +
@@ -69,14 +107,28 @@ function JeffersonApp() {
       const name = (window.LUMIO_DATA && window.LUMIO_DATA.student && window.LUMIO_DATA.student.name) || "";
       // Historique complet (sans le message d'accueil), tronqué aux 20 derniers tours
       const history = msgs.slice(1).slice(-20).map(m => ({ role: m.role === "user" ? "user" : "assistant", content: m.text }));
-      const resp = await fetch("/api/chat", {
+      const resp = await window.PAC_FETCH("/api/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: 300, system: buildJeffersonPrompt(name), messages: [...history, { role: "user", content: q }] })
       });
+      // F36 · Toute panne se traduisait par « Je suis momentanément
+      // indisponible », y compris un simple dépassement de délai — et la
+      // cause réelle n'était consignée nulle part. Impossible de
+      // diagnostiquer en séance. On distingue désormais les cas et on
+      // trace l'erreur exacte dans la console.
+      if (!resp.ok) {
+        const detail = await resp.text().catch(() => "");
+        console.error("Jefferson · /api/chat a répondu " + resp.status, detail.slice(0, 500));
+        setMsgs(m => [...m, { role: "assistant", text: "Je n'ai pas pu répondre (erreur " + resp.status + "). Repose-moi ta question." }]);
+        return;
+      }
       const data = await resp.json();
       const txt = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("") || "…";
       setMsgs(m => [...m, { role: "assistant", text: txt }]);
-    } catch (e) { setMsgs(m => [...m, { role: "assistant", text: "Je suis momentanément indisponible." }]); }
+    } catch (e) {
+      console.error("Jefferson · exception", e);
+      setMsgs(m => [...m, { role: "assistant", text: "Ma réponse n'est pas passée (" + (e && e.message ? e.message : "réseau") + "). Repose-moi ta question, je suis là." }]);
+    }
     setSending(false);
   };
 
