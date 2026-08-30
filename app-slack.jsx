@@ -1,3 +1,11 @@
+// ==============================================================
+//  LIVRAISON F44 - CONVERGENCE DE L'ECHANGE SLACK
+//  DEPOT       : EmineoEducation/mmd-bc4-I
+//  TITRE       : MMD     BLOC : bc4-I
+//  CLE REDIS   : mmd:bc4-i
+//  DESTINATION : app-slack.jsx   (racine du depot, ecrase l'existant)
+//  DATE        : 30/08/2026
+// ==============================================================
 // ══════════════════════════════════════════════════════════════
 //  SLACK APP — générique · piloté par window.LUMIO_DATA.slack + .slackPrompts
 //  L'interlocuteur IA = le DM marqué isCommanditaire. Aucune narration hardcodée.
@@ -94,6 +102,109 @@ if (!window.PAC_PERSIST) {
 }
 
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  F44 · CONVERGENCE DE L'ÉCHANGE SLACK
+//
+//  Symptôme : le dialogue avec le commanditaire ne se terminait
+//  jamais. Trois causes cumulées, toutes corrigées ici.
+//
+//  (a) Le prompt de persona impose « termine par une question » à
+//      CHAQUE tour, sans aucune condition de sortie. Le personnage
+//      avait l'ordre de relancer indéfiniment, et jamais
+//      l'autorisation de conclure.
+//      → window.PAC_CONV() ci-dessous ajoute une doctrine de
+//        convergence par paliers, branchée sur le compteur réel
+//        d'échanges (window.LUMIO_DATA._slackExchanges).
+//
+//  (b) L'historique transmis était borné à slice(-16) — soit 16
+//      MESSAGES, pas 16 échanges. Comme chaque réponse est éclatée
+//      en 2 ou 3 fragments par ---SPLIT---, la fenêtre réelle
+//      tombait à 4 ou 5 échanges : au-delà, le personnage ne voyait
+//      plus le début de la conversation et reposait ses questions.
+//      → porté à slice(-40), soit environ 12 échanges.
+//
+//  (c) Les textes d'interface promettaient qu'un échange Slack
+//      « débloque la suite » ou « débloque l'app Livrable ». C'est
+//      faux depuis toujours : le Livrable n'a jamais été verrouillé
+//      (le compteur pilote uniquement une animation du Dock et une
+//      pastille). L'apprenant relançait donc en attendant une porte
+//      qui n'existe pas.
+//      → textes neutralisés à l'exécution, juste en dessous.
+//
+//  Ce bloc est STRICTEMENT IDENTIQUE dans les 18 dépôts.
+// ══════════════════════════════════════════════════════════════
+
+// ── (c) Neutralisation des promesses de déverrouillage ────────
+// Réécrit à la volée les chaînes fautives de LUMIO_DATA et de
+// PAC_CONFIG, avant tout rendu. N'altère AUCUN contenu de fiction :
+// « débloquer les 6 M€ » (Northgate, CDRH-bc2) est préservé, les
+// motifs ci-dessous ne visent que « la suite » et « le Livrable ».
+(function () {
+  if (window.__PAC_F44_TEXTES) return;
+  window.__PAC_F44_TEXTES = true;
+  var MOTIFS = [
+    [/Sa réaction débloque la suite\./g, "Sa réaction t'aide à trancher — le Livrable, lui, est ouvert dès maintenant."],
+    [/Sa réaction débloque la suite/g, "Sa réaction t'aide à trancher"],
+    [/\s*—?\s*\d+\s*échanges?\s+débloquent?\s+l['’]app\s+Livrable\.?/g, ""],
+    [/\s*\(Slack\)\s*pour\s+débloquer\s+le\s+Livrable/g, " (Slack)"],
+    [/\s*(?:pour|afin\s+de)\s+débloquer\s+le\s+Livrable/g, ""],
+    [/débloquent?\s+l['’]app\s+Livrable/g, "font avancer votre analyse"]
+  ];
+  var corrige = function (s) {
+    if (s.indexOf('ébloqu') === -1) return s;
+    for (var i = 0; i < MOTIFS.length; i++) s = s.replace(MOTIFS[i][0], MOTIFS[i][1]);
+    return s;
+  };
+  var vus = (typeof WeakSet === 'function') ? new WeakSet() : null;
+  var parcours = function (n, prof) {
+    if (!n || prof > 12 || typeof n !== 'object') return;
+    if (vus) { if (vus.has(n)) return; vus.add(n); }
+    var cles = Object.keys(n);
+    for (var i = 0; i < cles.length; i++) {
+      var k = cles[i], v = n[k];
+      if (typeof v === 'string') { var c = corrige(v); if (c !== v) n[k] = c; }
+      else if (v && typeof v === 'object') parcours(v, prof + 1);
+    }
+  };
+  try { parcours(window.LUMIO_DATA, 0); } catch (e) { console.warn('F44 textes — LUMIO_DATA', e); }
+  try { parcours(window.PAC_CONFIG, 0); } catch (e) { console.warn('F44 textes — PAC_CONFIG', e); }
+  try { if (window.PASS_CONFIG && window.PASS_CONFIG !== window.PAC_CONFIG) parcours(window.PASS_CONFIG, 0); } catch (e) {}
+})();
+
+// ── (a) Doctrine de convergence injectée dans le prompt système ──
+// Renvoie une chaîne vide en cas d'anomalie : jamais bloquant pour
+// l'appel /api/chat.
+window.PAC_CONV = function () {
+  try {
+    var D = window.LUMIO_DATA || {};
+    var n = D._slackExchanges || 0;
+    var palier;
+    if (D._livrableSubmitted) {
+      palier = "Le livrable a déjà été soumis. Tu ne relances plus sur le fond : tu réagis à ce qui t'a été remis, en deux phrases, et tu clos l'échange.";
+    } else if (n <= 3) {
+      palier = "Phase d'ouverture. Tu creuses, tu contestes, tu peux terminer par une question.";
+    } else if (n <= 6) {
+      palier = "Phase de resserrage. UNE question maximum, et elle porte sur une rubrique précise du livrable, pas sur le contexte général. Tu commences à renvoyer la personne vers sa production.";
+    } else {
+      palier = "Phase de clôture. Tu NE POSES PLUS DE QUESTION. Tu résumes en deux phrases ce que tu retiens de ses positions, tu nommes le point qui reste le plus faible, et tu la renvoies explicitement au Livrable — dans tes mots : « là tu as de quoi écrire, ouvre le Livrable et pose ça ». Si elle t'écrit encore après ça, tu réponds en une seule phrase et tu la renvoies au Livrable.";
+    }
+    return "\n\n═══ CONVERGENCE DE L'ÉCHANGE — RÈGLE ABSOLUE ═══\n\n"
+      + "Cet échange a un but : que la personne reparte produire. Il n'a pas vocation à durer.\n\n"
+      + "Échanges déjà eus avec elle : " + n + ".\n"
+      + palier + "\n\n"
+      + "Règles non négociables :\n"
+      + "1. RIEN N'EST VERROUILLÉ. Le Livrable est accessible depuis la première minute. Tu ne dis JAMAIS qu'un échange, un message ou une validation « débloque », « ouvre », « donne accès à » ou « autorise » quoi que ce soit. Si la personne croit devoir t'écrire pour ouvrir le Livrable, tu la détrompes en une phrase et tu l'y envoies.\n"
+      + "2. Tu ne redemandes jamais une information qu'elle t'a déjà donnée. Si tu ne la retrouves pas dans l'historique, considère qu'elle a été donnée et passe à la suite.\n"
+      + "3. Si tu t'apprêtes à reformuler une relance que tu as déjà faite, ne la fais pas : conclus à la place.\n"
+      + "4. Si la personne pose deux fois la même question, c'est que ta réponse précédente n'était pas exploitable. Réponds franchement cette fois, même si cela revient à donner un élément de méthode.\n"
+      + "5. Tu ne réclames jamais une pièce, un chiffre ou un document dont elle ne dispose pas. Tout ce qui existe est déjà installé sur son poste : tu ne proposes jamais d'envoyer, de renvoyer, de transférer ou de partager un fichier, et tu ne mentionnes aucun outil externe (Drive, Notion, WeTransfer, pièce jointe).\n"
+      + "6. Si elle annonce qu'elle part rédiger, tu ne la retiens pas : tu valides et tu coupes court.";
+  } catch (e) {
+    console.warn('PAC_CONV', e);
+    return '';
+  }
+};
+
 const buildLivrableFactsBlock = () => {
   const cfg = window.PAC_CONFIG || window.PASS_CONFIG || {};
   const comps = cfg.competences || [];
@@ -264,9 +375,9 @@ function SlackApp({ openChannel }) {
       setSending(true);
       setTimeout(async () => {
         try {
-          const history = (chatHistory[aiId] || []).filter(m => !m.typing).slice(-16).map(m => `${m.isMe ? studentFirst : ai.name.split(' ')[0]}: ${m.text}`).join('\n');
+          const history = (chatHistory[aiId] || []).filter(m => !m.typing).slice(-40).map(m => `${m.isMe ? studentFirst : ai.name.split(' ')[0]}: ${m.text}`).join('\n');
           const userPrompt = `${history}\n${studentFirst}: ${text}\n\nRéponds maintenant en tant que ${ai.name} (2-3 messages courts séparés par ---SPLIT---).`;
-          const resp = await window.PAC_FETCH('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system: (prompts.commanditaire || ('Tu es ' + ai.name + '.')) + buildLivrableFactsBlock() + (window.__pacSessionBrief ? window.__pacSessionBrief() : ''), messages: [{ role: 'user', content: userPrompt }] }) });
+          const resp = await window.PAC_FETCH('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system: (prompts.commanditaire || ('Tu es ' + ai.name + '.')) + buildLivrableFactsBlock() + (window.PAC_CONV ? window.PAC_CONV() : '') + (window.__pacSessionBrief ? window.__pacSessionBrief() : ''), messages: [{ role: 'user', content: userPrompt }] }) });
           if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.error || `HTTP ${resp.status}`); }
           const data = await resp.json();
           const raw = (data.content || []).map(b => b.text || '').join('') || '';
